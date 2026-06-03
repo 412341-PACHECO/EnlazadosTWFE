@@ -1,0 +1,85 @@
+<ion-content [fullscreen]="true" class="login-content">
+  <section class="login-shell">
+    <div class="login-brand">
+      <div class="login-brand__badge">
+        <ion-icon name="heart"></ion-icon>
+      </div>
+      <h1>EnlazadosTW</h1>
+      <p>Plataforma de seguimiento terapeutico</p>
+    </div>
+
+    <div class="login-card">
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
+        <h2>Iniciar Sesion</h2>
+
+        <div class="field-group">
+          <label for="email">Correo Electronico</label>
+          <div class="input-shell" [class.input-shell--error]="hasControlError('email')">
+            <ion-icon name="mail-outline"></ion-icon>
+            <input
+              id="email"
+              type="email"
+              formControlName="email"
+              placeholder="tu@email.com"
+              autocomplete="email"
+            />
+          </div>
+          @if (hasControlError('email')) {
+            <p class="field-error">{{ getControlErrorMessage('email') }}</p>
+          }
+        </div>
+
+        <div class="field-group">
+          <label for="password">Contrasena</label>
+          <div class="input-shell" [class.input-shell--error]="hasControlError('password')">
+            <ion-icon name="lock-closed-outline"></ion-icon>
+            <input
+              id="password"
+              [type]="showPassword ? 'text' : 'password'"
+              formControlName="password"
+              placeholder="••••••••"
+              autocomplete="current-password"
+            />
+            <button
+              type="button"
+              class="icon-button"
+              (click)="togglePasswordVisibility()"
+              [attr.aria-label]="showPassword ? 'Ocultar contrasena' : 'Mostrar contrasena'"
+            >
+              <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+            </button>
+          </div>
+          @if (hasControlError('password')) {
+            <p class="field-error">{{ getControlErrorMessage('password') }}</p>
+          }
+        </div>
+
+        <a class="forgot-password" href="#">Olvidaste tu contrasena?</a>
+
+        @if (submitError) {
+          <p class="submit-message submit-message--error">{{ submitError }}</p>
+        }
+
+        <button class="submit-button" type="submit" [disabled]="isSubmitting">
+          @if (isSubmitting) {
+            <ion-spinner name="crescent"></ion-spinner>
+            <span>Ingresando...</span>
+          } @else {
+            <span>Ingresar</span>
+          }
+        </button>
+      </form>
+
+      <div class="login-divider">
+        <span>o</span>
+      </div>
+
+      <p class="login-footer">
+        No tienes cuenta?
+        <a routerLink="/auth">Registrate aqui</a>
+      </p>
+    </div>
+
+    <p class="login-caption">Trelew, Chubut · Seguimiento interdisciplinario</p>
+  </section>
+</ion-content>

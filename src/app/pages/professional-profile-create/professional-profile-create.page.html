@@ -1,0 +1,143 @@
+<ion-content [fullscreen]="true" class="professional-content">
+  <section class="professional-shell">
+    <div class="professional-brand">
+      <div class="professional-brand__badge">
+        <ion-icon name="heart"></ion-icon>
+      </div>
+      <h1>Alta Profesional</h1>
+      <p>Completa tu perfil para comenzar a trabajar en la plataforma</p>
+    </div>
+
+    <div class="professional-card">
+      <form [formGroup]="professionalForm" (ngSubmit)="onSubmit()" novalidate>
+        <div class="field-group">
+          <label for="specialty">Especialidad</label>
+          <div class="input-shell" [class.input-shell--error]="hasControlError('specialty')">
+            <ion-icon name="medkit-outline"></ion-icon>
+            <input
+              id="specialty"
+              type="text"
+              formControlName="specialty"
+              placeholder="Psicologia, Fonoaudiologia, Terapia ocupacional"
+            />
+          </div>
+          @if (hasControlError('specialty')) {
+            <p class="field-error">{{ getControlErrorMessage('specialty') }}</p>
+          }
+        </div>
+
+        <div class="field-group">
+          <label for="licenseNumber">Matricula profesional</label>
+          <div class="input-shell" [class.input-shell--error]="hasControlError('licenseNumber')">
+            <ion-icon name="ribbon-outline"></ion-icon>
+            <input
+              id="licenseNumber"
+              type="text"
+              formControlName="licenseNumber"
+              placeholder="Ingresa tu numero de matricula"
+            />
+          </div>
+          @if (hasControlError('licenseNumber')) {
+            <p class="field-error">{{ getControlErrorMessage('licenseNumber') }}</p>
+          }
+        </div>
+
+        <div class="field-grid">
+          <div class="field-group">
+            <label for="latitude">Latitud</label>
+            <div class="input-shell" [class.input-shell--error]="hasControlError('latitude')">
+              <ion-icon name="location-outline"></ion-icon>
+              <input
+                id="latitude"
+                type="text"
+                formControlName="latitude"
+                placeholder="-43.30016"
+              />
+            </div>
+            @if (hasControlError('latitude')) {
+              <p class="field-error">{{ getControlErrorMessage('latitude') }}</p>
+            }
+          </div>
+
+          <div class="field-group">
+            <label for="longitude">Longitud</label>
+            <div class="input-shell" [class.input-shell--error]="hasControlError('longitude')">
+              <ion-icon name="location-outline"></ion-icon>
+              <input
+                id="longitude"
+                type="text"
+                formControlName="longitude"
+                placeholder="-65.10228"
+              />
+            </div>
+            @if (hasControlError('longitude')) {
+              <p class="field-error">{{ getControlErrorMessage('longitude') }}</p>
+            }
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label for="professional-map">Ubicacion en mapa</label>
+          <div class="map-card">
+            <div #mapContainer id="professional-map" class="leaflet-map"></div>
+          </div>
+          <p class="map-hint">
+            Haz click en el mapa o arrastra el pin para completar latitud y longitud en Trelew.
+          </p>
+        </div>
+
+        <div class="field-group">
+          <label for="acceptedHealthInsurances">Obras sociales</label>
+          <div
+            class="input-shell input-shell--textarea"
+            [class.input-shell--error]="hasControlError('acceptedHealthInsurances')"
+          >
+            <ion-icon name="heart"></ion-icon>
+            <textarea
+              id="acceptedHealthInsurances"
+              formControlName="acceptedHealthInsurances"
+              placeholder="Ingresa las obras sociales separadas por coma"
+              rows="3"
+            ></textarea>
+          </div>
+          @if (hasControlError('acceptedHealthInsurances')) {
+            <p class="field-error">{{ getControlErrorMessage('acceptedHealthInsurances') }}</p>
+          }
+        </div>
+
+        <div class="field-group">
+          <label for="sessionFee">Honorario por sesion</label>
+          <div class="input-shell" [class.input-shell--error]="hasControlError('sessionFee')">
+            <ion-icon name="cash-outline"></ion-icon>
+            <input
+              id="sessionFee"
+              type="text"
+              formControlName="sessionFee"
+              placeholder="25000"
+            />
+          </div>
+          @if (hasControlError('sessionFee')) {
+            <p class="field-error">{{ getControlErrorMessage('sessionFee') }}</p>
+          }
+        </div>
+
+        @if (submitError) {
+          <p class="submit-message submit-message--error">{{ submitError }}</p>
+        }
+
+        @if (submitSuccess) {
+          <p class="submit-message submit-message--success">{{ submitSuccess }}</p>
+        }
+
+        <button class="submit-button" type="submit" [disabled]="isSubmitting">
+          @if (isSubmitting) {
+            <ion-spinner name="crescent"></ion-spinner>
+            <span>Guardando perfil...</span>
+          } @else {
+            <span>Guardar Perfil Profesional</span>
+          }
+        </button>
+      </form>
+    </div>
+  </section>
+</ion-content>

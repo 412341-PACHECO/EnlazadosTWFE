@@ -1,0 +1,175 @@
+<ion-content [fullscreen]="true" class="auth-content">
+  <section class="auth-shell">
+    <div class="auth-brand">
+      <div class="auth-brand__badge">
+        <ion-icon name="heart"></ion-icon>
+      </div>
+      <h1>Crear Cuenta</h1>
+      <p>Unete al equipo interdisciplinario</p>
+    </div>
+
+    <div class="auth-card">
+      <form [formGroup]="registrationForm" (ngSubmit)="onSubmit()" novalidate>
+        <div class="field-group">
+          <label for="firstName">Nombre</label>
+          <div class="input-shell" [class.input-shell--error]="hasControlError('firstName')">
+            <ion-icon name="person-outline"></ion-icon>
+            <input
+              id="firstName"
+              type="text"
+              formControlName="firstName"
+              placeholder="Juan"
+              autocomplete="given-name"
+            />
+          </div>
+          @if (hasControlError('firstName')) {
+            <p class="field-error">{{ getControlErrorMessage('firstName') }}</p>
+          }
+        </div>
+
+        <div class="field-group">
+          <label for="lastName">Apellido</label>
+          <div class="input-shell" [class.input-shell--error]="hasControlError('lastName')">
+            <ion-icon name="person-circle-outline"></ion-icon>
+            <input
+              id="lastName"
+              type="text"
+              formControlName="lastName"
+              placeholder="Perez"
+              autocomplete="family-name"
+            />
+          </div>
+          @if (hasControlError('lastName')) {
+            <p class="field-error">{{ getControlErrorMessage('lastName') }}</p>
+          }
+        </div>
+
+        <div class="field-group">
+          <label for="email">Correo Electronico</label>
+          <div class="input-shell" [class.input-shell--error]="hasControlError('email')">
+            <ion-icon name="mail-outline"></ion-icon>
+            <input
+              id="email"
+              type="email"
+              formControlName="email"
+              placeholder="tu@email.com"
+              autocomplete="email"
+            />
+          </div>
+          @if (hasControlError('email')) {
+            <p class="field-error">{{ getControlErrorMessage('email') }}</p>
+          }
+        </div>
+
+        <div class="field-group">
+          <label for="roleId">Rol Profesional</label>
+          <div class="input-shell input-shell--select" [class.input-shell--error]="hasControlError('roleId')">
+            <ion-icon name="briefcase-outline"></ion-icon>
+            <select id="roleId" formControlName="roleId" [disabled]="isLoadingRoles">
+              <option value="">Selecciona tu rol</option>
+              @for (role of roles; track role.id) {
+                <option [value]="role.id">{{ role.name }}</option>
+              }
+            </select>
+            <ion-icon name="chevron-down-outline"></ion-icon>
+          </div>
+          <p class="field-hint">{{ rolesHelperText }}</p>
+          @if (hasControlError('roleId')) {
+            <p class="field-error">{{ getControlErrorMessage('roleId') }}</p>
+          }
+        </div>
+
+        <div class="field-group">
+          <label for="password">Contrasena</label>
+          <div class="input-shell" [class.input-shell--error]="hasControlError('password')">
+            <ion-icon name="lock-closed-outline"></ion-icon>
+            <input
+              id="password"
+              [type]="showPassword ? 'text' : 'password'"
+              formControlName="password"
+              placeholder="Minimo 8 caracteres"
+              autocomplete="new-password"
+            />
+            <button
+              type="button"
+              class="icon-button"
+              (click)="togglePasswordVisibility()"
+              [attr.aria-label]="showPassword ? 'Ocultar contrasena' : 'Mostrar contrasena'"
+            >
+              <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+            </button>
+          </div>
+          @if (hasControlError('password')) {
+            <p class="field-error">{{ getControlErrorMessage('password') }}</p>
+          }
+        </div>
+
+        <div class="field-group">
+          <label for="confirmPassword">Confirmar Contrasena</label>
+          <div
+            class="input-shell"
+            [class.input-shell--error]="
+              hasControlError('confirmPassword') || hasFormError('passwordMismatch')
+            "
+          >
+            <ion-icon name="lock-closed-outline"></ion-icon>
+            <input
+              id="confirmPassword"
+              [type]="showConfirmPassword ? 'text' : 'password'"
+              formControlName="confirmPassword"
+              placeholder="Repite tu contrasena"
+              autocomplete="new-password"
+            />
+            <button
+              type="button"
+              class="icon-button"
+              (click)="toggleConfirmPasswordVisibility()"
+              [attr.aria-label]="
+                showConfirmPassword ? 'Ocultar confirmacion de contrasena' : 'Mostrar confirmacion de contrasena'
+              "
+            >
+              <ion-icon [name]="showConfirmPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+            </button>
+          </div>
+          @if (hasControlError('confirmPassword')) {
+            <p class="field-error">{{ getControlErrorMessage('confirmPassword') }}</p>
+          } @else if (hasFormError('passwordMismatch')) {
+            <p class="field-error">Las contrasenas no coinciden.</p>
+          }
+        </div>
+
+        <label class="terms-check">
+          <input type="checkbox" formControlName="acceptTerms" />
+          <span>
+            Acepto los terminos y condiciones de uso de la plataforma y las politicas de privacidad de datos
+          </span>
+        </label>
+        @if (hasControlError('acceptTerms')) {
+          <p class="field-error">{{ getControlErrorMessage('acceptTerms') }}</p>
+        }
+
+        @if (submitError) {
+          <p class="submit-message submit-message--error">{{ submitError }}</p>
+        }
+
+        <button class="submit-button" type="submit" [disabled]="isSubmitting || isLoadingRoles">
+          @if (isSubmitting) {
+            <ion-spinner name="crescent"></ion-spinner>
+            <span>Creando cuenta...</span>
+          } @else {
+            <span>Crear Cuenta</span>
+          }
+        </button>
+      </form>
+
+      <div class="auth-divider">
+        <span>o</span>
+      </div>
+
+      <p class="auth-footer">
+        Ya tienes cuenta?
+        <a routerLink="/login">Inicia sesion</a>
+      </p>
+    </div>
+  </section>
+</ion-content>

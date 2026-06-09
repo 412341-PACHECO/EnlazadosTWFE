@@ -1,31 +1,31 @@
 :host {
-  --login-accent: #1d9fc1;
-  --login-accent-dark: #0c7d9f;
-  --login-accent-soft: #19c57e;
-  --login-ink: #10213d;
-  --login-muted: #71819b;
-  --login-border: #d8e1ee;
-  --login-panel: rgba(255, 255, 255, 0.92);
-  --login-surface: #f6fbff;
-  --login-error: #d64545;
+  --verify-accent: #1d9fc1;
+  --verify-accent-dark: #0c7d9f;
+  --verify-ink: #10213d;
+  --verify-muted: #71819b;
+  --verify-border: #d8e1ee;
+  --verify-panel: rgba(255, 255, 255, 0.92);
+  --verify-surface: #f6fbff;
+  --verify-error: #d64545;
+  --verify-success: #177e5b;
 
   display: block;
 }
 
-.login-content {
+.verify-content {
   --background:
     radial-gradient(circle at top, rgba(39, 176, 196, 0.08), transparent 28%),
     linear-gradient(180deg, #fcfdff 0%, #f1f7ff 100%);
 }
 
-.login-shell {
+.verify-shell {
   min-height: 100%;
   display: grid;
   place-items: center;
   padding: 36px 20px 28px;
 }
 
-.login-brand {
+.verify-brand {
   display: grid;
   justify-items: center;
   gap: 12px;
@@ -33,21 +33,20 @@
   text-align: center;
 }
 
-.login-brand h1 {
+.verify-brand h1 {
   margin: 0;
-  color: var(--login-ink);
+  color: var(--verify-ink);
   font-size: clamp(2rem, 4vw, 2.7rem);
   font-weight: 700;
   letter-spacing: -0.04em;
 }
 
-.login-brand p,
-.login-caption {
+.verify-brand p {
   margin: 0;
-  color: var(--login-muted);
+  color: var(--verify-muted);
 }
 
-.login-brand__badge {
+.verify-brand__badge {
   width: 74px;
   height: 74px;
   border-radius: 50%;
@@ -57,30 +56,72 @@
   box-shadow: 0 18px 40px rgba(33, 93, 136, 0.08);
 }
 
-.login-brand__badge ion-icon {
+.verify-brand__badge ion-icon {
   font-size: 2rem;
   color: #1391b0;
 }
 
-.login-card {
-  width: min(100%, 500px);
+.verify-card {
+  width: min(100%, 520px);
   padding: 34px 34px 28px;
   border-radius: 22px;
-  background: var(--login-panel);
+  background: var(--verify-panel);
   border: 1px solid rgba(216, 225, 238, 0.9);
   box-shadow: 0 24px 60px rgba(16, 33, 61, 0.1);
   backdrop-filter: blur(10px);
 }
 
+.status-panel {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 14px;
+  align-items: start;
+  padding: 18px;
+  border-radius: 18px;
+  background: var(--verify-surface);
+  border: 1px solid var(--verify-border);
+  margin-bottom: 24px;
+}
+
+.status-panel ion-icon,
+.status-panel ion-spinner {
+  font-size: 1.8rem;
+  color: var(--verify-accent);
+}
+
+.status-panel--success {
+  border-color: rgba(23, 126, 91, 0.22);
+  background: rgba(23, 126, 91, 0.07);
+}
+
+.status-panel--success ion-icon {
+  color: var(--verify-success);
+}
+
+.status-panel--error {
+  border-color: rgba(214, 69, 69, 0.22);
+  background: rgba(214, 69, 69, 0.07);
+}
+
+.status-panel--error ion-icon {
+  color: var(--verify-error);
+}
+
+.status-panel h2,
+form h3 {
+  margin: 0 0 6px;
+  color: var(--verify-ink);
+}
+
+.status-panel p {
+  margin: 0;
+  color: var(--verify-muted);
+  line-height: 1.5;
+}
+
 form {
   display: grid;
   gap: 20px;
-}
-
-form h2 {
-  margin: 0 0 6px;
-  color: var(--login-ink);
-  font-size: 1.95rem;
 }
 
 .field-group {
@@ -89,21 +130,21 @@ form h2 {
 }
 
 .field-group label {
-  color: var(--login-ink);
+  color: var(--verify-ink);
   font-size: 0.98rem;
   font-weight: 700;
 }
 
 .input-shell {
   display: grid;
-  grid-template-columns: 22px 1fr auto;
+  grid-template-columns: 22px 1fr;
   align-items: center;
   gap: 12px;
   min-height: 60px;
   padding: 0 16px;
   border-radius: 15px;
-  border: 1px solid var(--login-border);
-  background: var(--login-surface);
+  border: 1px solid var(--verify-border);
+  background: var(--verify-surface);
   transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
@@ -119,7 +160,7 @@ form h2 {
 }
 
 .input-shell ion-icon {
-  color: var(--login-muted);
+  color: var(--verify-muted);
   font-size: 1.2rem;
 }
 
@@ -128,59 +169,34 @@ form h2 {
   border: 0;
   outline: 0;
   background: transparent;
-  color: var(--login-ink);
+  color: var(--verify-ink);
   font-size: 1rem;
-}
-
-.input-shell input::placeholder {
-  color: #8b99af;
-}
-
-.icon-button {
-  display: grid;
-  place-items: center;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  cursor: pointer;
-}
-
-.forgot-password {
-  color: #0d98c4;
-  text-decoration: none;
-  font-size: 0.95rem;
-  font-weight: 600;
-}
-
-.login-links {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.field-error,
-.submit-message,
-.login-footer,
-.login-caption {
-  font-size: 0.9rem;
-  line-height: 1.5;
 }
 
 .field-error,
 .submit-message {
   margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
 }
 
 .field-error,
 .submit-message--error {
-  color: var(--login-error);
+  color: var(--verify-error);
 }
 
 .submit-message {
   padding: 12px 14px;
   border-radius: 12px;
+}
+
+.submit-message--error {
   background: rgba(214, 69, 69, 0.08);
+}
+
+.submit-message--success {
+  color: var(--verify-success);
+  background: rgba(23, 126, 91, 0.08);
 }
 
 .submit-button {
@@ -191,7 +207,7 @@ form h2 {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  background: linear-gradient(180deg, #1da7cd 0%, var(--login-accent) 100%);
+  background: linear-gradient(180deg, #1da7cd 0%, var(--verify-accent) 100%);
   color: #fff;
   font-size: 1rem;
   font-weight: 700;
@@ -204,50 +220,27 @@ form h2 {
   opacity: 0.8;
 }
 
-.login-divider {
-  position: relative;
-  margin: 28px 0 18px;
-  text-align: center;
-}
-
-.login-divider::before {
-  content: '';
-  position: absolute;
-  inset: 50% 0 auto;
-  border-top: 1px solid rgba(216, 225, 238, 0.95);
-}
-
-.login-divider span {
-  position: relative;
-  padding: 0 14px;
-  color: var(--login-muted);
-  background: rgba(255, 255, 255, 0.92);
-}
-
-.login-footer {
-  margin: 0;
-  text-align: center;
-  color: var(--login-ink);
-}
-
-.login-footer a {
-  color: var(--login-accent-soft);
-  font-weight: 700;
+.back-link {
+  margin-top: 22px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--verify-accent-dark);
   text-decoration: none;
-}
-
-.login-caption {
-  margin-top: 28px;
-  text-align: center;
+  font-weight: 700;
 }
 
 @media (max-width: 520px) {
-  .login-shell {
+  .verify-shell {
     padding: 22px 14px;
   }
 
-  .login-card {
+  .verify-card {
     padding: 24px 18px;
     border-radius: 18px;
+  }
+
+  .status-panel {
+    grid-template-columns: 1fr;
   }
 }

@@ -1,0 +1,129 @@
+<ion-content [fullscreen]="true" class="patient-content">
+  <section class="patient-shell">
+    <div class="patient-brand">
+      <div class="patient-brand__badge">
+        <ion-icon name="heart"></ion-icon>
+      </div>
+      <h1>Alta de Paciente</h1>
+      <p>Registra un nuevo paciente y vinculado automaticamente a tu sesion de padre</p>
+    </div>
+
+    <div class="patient-card">
+      <form [formGroup]="patientForm" (ngSubmit)="onSubmit()" novalidate>
+        <div class="field-grid">
+          <div class="field-group">
+            <label for="firstName">Nombre</label>
+            <div class="input-shell" [class.input-shell--error]="hasControlError('firstName')">
+              <ion-icon name="person-outline"></ion-icon>
+              <input
+                id="firstName"
+                type="text"
+                formControlName="firstName"
+                placeholder="Ingresa el nombre del paciente"
+              />
+            </div>
+            @if (hasControlError('firstName')) {
+              <p class="field-error">{{ getControlErrorMessage('firstName') }}</p>
+            }
+          </div>
+
+          <div class="field-group">
+            <label for="lastName">Apellido</label>
+            <div class="input-shell" [class.input-shell--error]="hasControlError('lastName')">
+              <ion-icon name="person-outline"></ion-icon>
+              <input
+                id="lastName"
+                type="text"
+                formControlName="lastName"
+                placeholder="Ingresa el apellido del paciente"
+              />
+            </div>
+            @if (hasControlError('lastName')) {
+              <p class="field-error">{{ getControlErrorMessage('lastName') }}</p>
+            }
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label for="parentDisplay">Padre o tutor vinculado</label>
+          <div class="input-shell input-shell--readonly">
+            <ion-icon name="mail-outline"></ion-icon>
+            <input
+              id="parentDisplay"
+              type="text"
+              formControlName="parentDisplay"
+              placeholder="Cargando padre asociado..."
+              readonly
+            />
+          </div>
+          <p class="field-hint">
+            @if (isLoadingParent) {
+              Recuperando los datos del usuario autenticado...
+            } @else {
+              Este valor se completa automaticamente desde la sesion activa.
+            }
+          </p>
+        </div>
+
+        <div class="field-group">
+          <label for="diagnosis">Diagnostico</label>
+          <div
+            class="input-shell input-shell--textarea"
+            [class.input-shell--error]="hasControlError('diagnosis')"
+          >
+            <ion-icon name="clipboard-outline"></ion-icon>
+            <textarea
+              id="diagnosis"
+              formControlName="diagnosis"
+              placeholder="Describe el diagnostico o las observaciones relevantes"
+              rows="4"
+            ></textarea>
+          </div>
+          @if (hasControlError('diagnosis')) {
+            <p class="field-error">{{ getControlErrorMessage('diagnosis') }}</p>
+          }
+        </div>
+
+        <div class="field-group">
+          <label for="institutionId">Institucion vinculada</label>
+          <div class="input-shell" [class.input-shell--error]="hasControlError('institutionId')">
+            <ion-icon name="business-outline"></ion-icon>
+            <input
+              id="institutionId"
+              type="text"
+              formControlName="institutionId"
+              placeholder="Ingresa el UUID de la institucion"
+            />
+          </div>
+          @if (hasControlError('institutionId')) {
+            <p class="field-error">{{ getControlErrorMessage('institutionId') }}</p>
+          }
+          <p class="field-hint">
+            Por ahora este alta espera el `UUID` de la institucion hasta integrar su selector.
+          </p>
+        </div>
+
+        @if (submitError) {
+          <p class="submit-message submit-message--error">{{ submitError }}</p>
+        }
+
+        @if (submitSuccess) {
+          <p class="submit-message submit-message--success">{{ submitSuccess }}</p>
+        }
+
+        <button
+          class="submit-button"
+          type="submit"
+          [disabled]="isSubmitting || isLoadingParent || !patientForm.controls.parentId.value"
+        >
+          @if (isSubmitting) {
+            <ion-spinner name="crescent"></ion-spinner>
+            <span>Guardando paciente...</span>
+          } @else {
+            <span>Guardar Paciente</span>
+          }
+        </button>
+      </form>
+    </div>
+  </section>
+</ion-content>

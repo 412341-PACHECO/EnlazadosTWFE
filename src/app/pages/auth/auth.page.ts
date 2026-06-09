@@ -122,6 +122,7 @@ export class AuthPage {
       .subscribe({
         next: () => {
           this.isSubmitting = false;
+          const registeredEmail = email;
           this.registrationForm.reset({
             firstName: '',
             lastName: '',
@@ -131,7 +132,9 @@ export class AuthPage {
             confirmPassword: '',
             acceptTerms: false,
           });
-          void this.router.navigate(['/login']);
+          void this.router.navigate(['/verify-email'], {
+            queryParams: { email: registeredEmail },
+          });
         },
         error: (error: unknown) => {
           this.isSubmitting = false;

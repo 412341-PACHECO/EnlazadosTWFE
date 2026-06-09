@@ -54,7 +54,10 @@
           }
         </div>
 
-        <a class="forgot-password" href="#">Olvidaste tu contrasena?</a>
+        <div class="login-links">
+          <a class="forgot-password" routerLink="/forgot-password">Olvidaste tu contrasena?</a>
+          <a class="forgot-password" routerLink="/verify-email">Reenviar verificacion</a>
+        </div>
 
         @if (submitError) {
           <p class="submit-message submit-message--error">{{ submitError }}</p>

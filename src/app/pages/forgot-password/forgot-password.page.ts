@@ -2,68 +2,59 @@ import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { IonContent, IonIcon, IonSpinner } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import {
-  eyeOffOutline,
-  eyeOutline,
-  heart,
-  lockClosedOutline,
-  mailOutline,
-} from 'ionicons/icons';
+import { arrowBackOutline, heart, mailOutline } from 'ionicons/icons';
 
 import { AuthService } from '../../services/auth.service';
 
 @Component({
-  selector: 'app-login',
-  templateUrl: './login.page.html',
-  styleUrls: ['./login.page.scss'],
+  selector: 'app-forgot-password',
+  templateUrl: './forgot-password.page.html',
+  styleUrls: ['./forgot-password.page.scss'],
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink, IonContent, IonIcon, IonSpinner],
 })
-export class LoginPage {
+export class ForgotPasswordPage {
   private readonly formBuilder = inject(FormBuilder);
   private readonly authService = inject(AuthService);
-  private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
 
   protected isSubmitting = false;
-  protected showPassword = false;
   protected submitError = '';
+  protected submitSuccess = '';
 
-  protected readonly loginForm = this.formBuilder.nonNullable.group({
+  protected readonly forgotPasswordForm = this.formBuilder.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(8)]],
   });
 
   constructor() {
     addIcons({
-      eyeOffOutline,
-      eyeOutline,
+      arrowBackOutline,
       heart,
-      lockClosedOutline,
       mailOutline,
     });
   }
 
   protected onSubmit(): void {
     this.submitError = '';
+    this.submitSuccess = '';
 
-    if (this.loginForm.invalid) {
-      this.loginForm.markAllAsTouched();
+    if (this.forgotPasswordForm.invalid) {
+      this.forgotPasswordForm.markAllAsTouched();
       return;
     }
 
     this.isSubmitting = true;
 
     this.authService
-      .login(this.loginForm.getRawValue())
+      .forgotPassword(this.forgotPasswordForm.getRawValue())
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
           this.isSubmitting = false;
-          void this.router.navigate([this.getRouteByRole(response.role)]);
+          this.submitSuccess = response.message;
         },
         error: (error: unknown) => {
           this.isSubmitting = false;
@@ -72,17 +63,13 @@ export class LoginPage {
       });
   }
 
-  protected togglePasswordVisibility(): void {
-    this.showPassword = !this.showPassword;
-  }
-
-  protected hasControlError(controlName: 'email' | 'password'): boolean {
-    const control = this.loginForm.get(controlName);
+  protected hasControlError(): boolean {
+    const control = this.forgotPasswordForm.get('email');
     return !!control && control.invalid && (control.dirty || control.touched);
   }
 
-  protected getControlErrorMessage(controlName: 'email' | 'password'): string {
-    const control = this.loginForm.get(controlName);
+  protected getControlErrorMessage(): string {
+    const control = this.forgotPasswordForm.get('email');
 
     if (!control?.errors) {
       return '';
@@ -96,15 +83,11 @@ export class LoginPage {
       return 'Ingresa un correo electronico valido.';
     }
 
-    if (control.errors['minlength']) {
-      return `Debe tener al menos ${control.errors['minlength'].requiredLength} caracteres.`;
-    }
-
     return 'Revisa este campo.';
   }
 
   private extractErrorMessage(error: unknown): string {
-    const fallbackMessage = 'No se pudo iniciar sesion. Verifica tus credenciales.';
+    const fallbackMessage = 'No se pudo procesar la solicitud. Intenta nuevamente.';
 
     if (
       typeof error === 'object' &&
@@ -119,17 +102,5 @@ export class LoginPage {
     }
 
     return fallbackMessage;
-  }
-
-  private getRouteByRole(role: string): string {
-    if (role === 'PROFESSIONAL') {
-      return '/professional-profile/create';
-    }
-
-    if (role === 'PARENT') {
-      return '/patient/create';
-    }
-
-    return '/home';
   }
 }

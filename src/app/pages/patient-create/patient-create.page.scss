@@ -1,0 +1,226 @@
+:host {
+  --patient-accent: #2f9e7f;
+  --patient-accent-dark: #20755d;
+  --patient-accent-soft: #7dcfb6;
+  --patient-ink: #10213d;
+  --patient-muted: #71819b;
+  --patient-border: #d8e1ee;
+  --patient-panel: rgba(255, 255, 255, 0.92);
+  --patient-surface: #f7fcfa;
+  --patient-error: #d64545;
+  --patient-success: #177e5b;
+
+  display: block;
+}
+
+.patient-content {
+  --background:
+    radial-gradient(circle at top, rgba(47, 158, 127, 0.1), transparent 28%),
+    linear-gradient(180deg, #fcfefc 0%, #eef8f3 100%);
+}
+
+.patient-shell {
+  min-height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 36px 20px;
+}
+
+.patient-brand {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  margin-bottom: 28px;
+  text-align: center;
+}
+
+.patient-brand h1 {
+  margin: 0;
+  color: var(--patient-ink);
+  font-size: clamp(2rem, 4vw, 2.6rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+
+.patient-brand p {
+  margin: 0;
+  color: var(--patient-muted);
+}
+
+.patient-brand__badge {
+  width: 74px;
+  height: 74px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(180deg, #edf9f5 0%, #d9f1e8 100%);
+  box-shadow: 0 18px 40px rgba(34, 103, 81, 0.08);
+}
+
+.patient-brand__badge ion-icon {
+  font-size: 2rem;
+  color: var(--patient-accent);
+}
+
+.patient-card {
+  width: min(100%, 560px);
+  padding: 32px 30px;
+  border-radius: 22px;
+  background: var(--patient-panel);
+  border: 1px solid rgba(216, 225, 238, 0.9);
+  box-shadow: 0 24px 60px rgba(16, 33, 61, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+form {
+  display: grid;
+  gap: 18px;
+}
+
+.field-group {
+  display: grid;
+  gap: 8px;
+}
+
+.field-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.field-group label {
+  color: var(--patient-ink);
+  font-size: 0.98rem;
+  font-weight: 700;
+}
+
+.field-hint {
+  margin: 0;
+  color: var(--patient-muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.input-shell {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  align-items: center;
+  gap: 12px;
+  min-height: 60px;
+  padding: 0 16px;
+  border-radius: 15px;
+  border: 1px solid var(--patient-border);
+  background: var(--patient-surface);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.input-shell:focus-within {
+  border-color: rgba(47, 158, 127, 0.7);
+  box-shadow: 0 0 0 4px rgba(47, 158, 127, 0.12);
+  transform: translateY(-1px);
+}
+
+.input-shell--error {
+  border-color: rgba(214, 69, 69, 0.7);
+  box-shadow: 0 0 0 4px rgba(214, 69, 69, 0.08);
+}
+
+.input-shell--readonly {
+  background: #f2f7f4;
+}
+
+.input-shell ion-icon {
+  color: var(--patient-muted);
+  font-size: 1.2rem;
+}
+
+.input-shell input,
+.input-shell textarea {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--patient-ink);
+  font-size: 1rem;
+  resize: none;
+}
+
+.input-shell input[readonly] {
+  cursor: default;
+}
+
+.input-shell textarea {
+  padding: 18px 0;
+  min-height: 110px;
+}
+
+.input-shell input::placeholder,
+.input-shell textarea::placeholder {
+  color: #8b99af;
+}
+
+.input-shell--textarea {
+  align-items: start;
+}
+
+.field-error,
+.submit-message {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.field-error {
+  color: var(--patient-error);
+}
+
+.submit-message {
+  padding: 12px 14px;
+  border-radius: 12px;
+}
+
+.submit-message--error {
+  color: var(--patient-error);
+  background: rgba(214, 69, 69, 0.08);
+}
+
+.submit-message--success {
+  color: var(--patient-success);
+  background: rgba(23, 126, 91, 0.08);
+}
+
+.submit-button {
+  min-height: 56px;
+  border: 0;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: linear-gradient(180deg, #45b08f 0%, var(--patient-accent) 100%);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 18px 30px rgba(47, 158, 127, 0.24);
+}
+
+.submit-button:disabled {
+  cursor: wait;
+  opacity: 0.8;
+}
+
+@media (max-width: 640px) {
+  .patient-shell {
+    padding: 22px 14px;
+  }
+
+  .patient-card {
+    padding: 24px 18px;
+    border-radius: 18px;
+  }
+
+  .field-grid {
+    grid-template-columns: 1fr;
+  }
+}

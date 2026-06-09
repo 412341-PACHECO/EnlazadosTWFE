@@ -1,0 +1,76 @@
+<ion-content [fullscreen]="true" class="verify-content">
+  <section class="verify-shell">
+    <div class="verify-brand">
+      <div class="verify-brand__badge">
+        <ion-icon name="heart"></ion-icon>
+      </div>
+      <h1>Verificar Cuenta</h1>
+      <p>Confirma tu correo para habilitar el acceso a la plataforma</p>
+    </div>
+
+    <div class="verify-card">
+      <div class="status-panel" [class.status-panel--success]="verificationStatus === 'success'" [class.status-panel--error]="verificationStatus === 'error'">
+        @if (verificationStatus === 'loading') {
+          <ion-spinner name="crescent"></ion-spinner>
+        } @else if (verificationStatus === 'success') {
+          <ion-icon name="checkmark-circle-outline"></ion-icon>
+        } @else if (verificationStatus === 'error') {
+          <ion-icon name="warning-outline"></ion-icon>
+        } @else {
+          <ion-icon name="mail-outline"></ion-icon>
+        }
+
+        <div>
+          <h2>Estado de verificacion</h2>
+          <p>{{ verificationMessage }}</p>
+        </div>
+      </div>
+
+      @if (verificationStatus !== 'success') {
+        <form [formGroup]="resendForm" (ngSubmit)="onResend()" novalidate>
+          <h3>Reenviar correo</h3>
+
+          <div class="field-group">
+            <label for="email">Correo Electronico</label>
+            <div class="input-shell" [class.input-shell--error]="hasControlError()">
+              <ion-icon name="mail-outline"></ion-icon>
+              <input
+                id="email"
+                type="email"
+                formControlName="email"
+                placeholder="tu@email.com"
+                autocomplete="email"
+              />
+            </div>
+            @if (hasControlError()) {
+              <p class="field-error">{{ getControlErrorMessage() }}</p>
+            }
+          </div>
+
+          @if (resendError) {
+            <p class="submit-message submit-message--error">{{ resendError }}</p>
+          }
+
+          @if (resendSuccess) {
+            <p class="submit-message submit-message--success">{{ resendSuccess }}</p>
+          }
+
+          <button class="submit-button" type="submit" [disabled]="isResending">
+            @if (isResending) {
+              <ion-spinner name="crescent"></ion-spinner>
+              <span>Reenviando...</span>
+            } @else {
+              <ion-icon name="refresh-outline"></ion-icon>
+              <span>Reenviar verificacion</span>
+            }
+          </button>
+        </form>
+      }
+
+      <a class="back-link" routerLink="/login">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+        <span>Volver a iniciar sesion</span>
+      </a>
+    </div>
+  </section>
+</ion-content>

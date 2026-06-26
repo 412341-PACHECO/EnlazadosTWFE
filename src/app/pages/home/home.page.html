@@ -1,0 +1,88 @@
+<ion-content [fullscreen]="true" class="dashboard-content">
+  <section class="dashboard-shell">
+    <header class="dashboard-header">
+      <div class="brand-row">
+        <div class="brand-pill">
+          <div class="brand-pill__icon">
+            <ion-icon name="heart"></ion-icon>
+          </div>
+          <span>EnlazadosTW</span>
+        </div>
+
+        <button class="notification-button" type="button" aria-label="Notificaciones">
+          <ion-icon name="notifications-outline"></ion-icon>
+          <span>{{ notificationsCount }}</span>
+        </button>
+      </div>
+
+      <div class="welcome-card">
+        <div>
+          <p>Buenos días</p>
+          <h1>{{ displayName }}</h1>
+        </div>
+
+        <div class="welcome-date">
+          <ion-icon name="calendar-outline"></ion-icon>
+          <span>{{ todayLabel }}</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="dashboard-main">
+      @if (activeTab === 'profile') {
+        <app-home-profile-tab [session]="session" (logoutRequested)="logout()"></app-home-profile-tab>
+      }
+
+      @if (activeTab === 'map') {
+        <app-home-map-tab></app-home-map-tab>
+      }
+
+      @if (activeTab === 'record') {
+        <app-home-record-tab [session]="session"></app-home-record-tab>
+      }
+
+      @if (activeTab === 'docs') {
+        <app-home-docs-tab></app-home-docs-tab>
+      }
+    </main>
+  </section>
+
+  <nav class="tabbar" aria-label="Navegación principal">
+    <button
+      type="button"
+      class="tabbar__item"
+      [class.tabbar__item--active]="activeTab === 'profile'"
+      (click)="setActiveTab('profile')"
+    >
+      <ion-icon name="person-outline"></ion-icon>
+      <span>Perfil</span>
+    </button>
+    <button
+      type="button"
+      class="tabbar__item"
+      [class.tabbar__item--active]="activeTab === 'map'"
+      (click)="setActiveTab('map')"
+    >
+      <ion-icon name="location-outline"></ion-icon>
+      <span>Mapa</span>
+    </button>
+    <button
+      type="button"
+      class="tabbar__item"
+      [class.tabbar__item--active]="activeTab === 'record'"
+      (click)="setActiveTab('record')"
+    >
+      <ion-icon name="folder-open-outline"></ion-icon>
+      <span>Legajo</span>
+    </button>
+    <button
+      type="button"
+      class="tabbar__item"
+      [class.tabbar__item--active]="activeTab === 'docs'"
+      (click)="setActiveTab('docs')"
+    >
+      <ion-icon name="document-text-outline"></ion-icon>
+      <span>Docs PDF</span>
+    </button>
+  </nav>
+</ion-content>

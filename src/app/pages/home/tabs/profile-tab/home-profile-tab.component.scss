@@ -1,0 +1,141 @@
+:host {
+  --dash-ink: #0d2344;
+  --dash-muted: #6d7c92;
+  --dash-border: #d9e4ef;
+  --dash-danger: #eb5b5b;
+
+  display: block;
+}
+
+.tab-panel {
+  display: grid;
+  gap: 18px;
+  padding-bottom: 24px;
+}
+
+.tab-panel h2 {
+  margin: 0;
+  color: var(--dash-ink);
+}
+
+.profile-card {
+  padding: 20px;
+  border-radius: 20px;
+  display: grid;
+  gap: 18px;
+  background: linear-gradient(180deg, #169bbb 0%, #117f9e 100%);
+  color: #fff;
+  box-shadow: 0 18px 40px rgba(17, 127, 158, 0.24);
+}
+
+.profile-card__identity {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 14px;
+  align-items: center;
+}
+
+.profile-avatar {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.16);
+  font-size: 1.45rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.profile-copy {
+  min-width: 0;
+}
+
+.profile-copy h3 {
+  margin: 0 0 4px;
+  color: #fff;
+  font-size: 1.55rem;
+}
+
+.profile-copy p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.verified-row {
+  margin-top: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #fff5d1;
+  font-size: 0.9rem;
+}
+
+.profile-stats {
+  padding: 12px 10px;
+  border-radius: 16px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.profile-stats__item {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+}
+
+.profile-stats__item + .profile-stats__item {
+  border-left: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.profile-stats__item strong {
+  font-size: 1.4rem;
+}
+
+.profile-stats__item span {
+  font-size: 0.84rem;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.details-card {
+  border: 1px solid var(--dash-border);
+  border-radius: 18px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 10px 24px rgba(12, 27, 52, 0.08);
+}
+
+.details-row {
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.details-row + .details-row {
+  border-top: 1px solid var(--dash-border);
+}
+
+.details-row span {
+  color: var(--dash-muted);
+}
+
+.details-row strong {
+  color: var(--dash-ink);
+  text-align: right;
+}
+
+.ghost-danger-button {
+  min-height: 54px;
+  border: 1px solid rgba(235, 91, 91, 0.45);
+  border-radius: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: transparent;
+  color: var(--dash-danger);
+  font-weight: 700;
+}

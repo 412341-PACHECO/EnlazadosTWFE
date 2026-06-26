@@ -27,6 +27,13 @@ export const routes: Routes = [
       import('./pages/reset-password/reset-password.page').then((m) => m.ResetPasswordPage),
   },
   {
+    path: 'therapeutic-team-invitation',
+    loadComponent: () =>
+      import('./pages/therapeutic-team-invitation/therapeutic-team-invitation.page').then(
+        (m) => m.TherapeuticTeamInvitationPage,
+      ),
+  },
+  {
     path: 'professional-profile/create',
     loadComponent: () =>
       import('./pages/professional-profile-create/professional-profile-create.page').then(
@@ -42,7 +49,7 @@ export const routes: Routes = [
   },
   {
     path: 'home',
-    loadComponent: () => import('./home/home.page').then((m) => m.HomePage),
+    loadComponent: () => import('./pages/home/home.page').then((m) => m.HomePage),
   },
   {
     path: '',

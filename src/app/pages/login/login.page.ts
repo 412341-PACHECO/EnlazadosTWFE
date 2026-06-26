@@ -1,9 +1,11 @@
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, DestroyRef, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { IonContent, IonIcon, IonSpinner } from '@ionic/angular/standalone';
+import { Observable, catchError, of, switchMap } from 'rxjs';
 import { addIcons } from 'ionicons';
 import {
   eyeOffOutline,
@@ -13,7 +15,11 @@ import {
   mailOutline,
 } from 'ionicons/icons';
 
+import { AuthResponse, UserResponse } from '../../models';
 import { AuthService } from '../../services/auth.service';
+import { PatientService } from '../../services/patient.service';
+import { ProfessionalProfileService } from '../../services/professional-profile.service';
+import { UserService } from '../../services/user.service';
 
 @Component({
   selector: 'app-login',
@@ -25,6 +31,9 @@ import { AuthService } from '../../services/auth.service';
 export class LoginPage {
   private readonly formBuilder = inject(FormBuilder);
   private readonly authService = inject(AuthService);
+  private readonly patientService = inject(PatientService);
+  private readonly professionalProfileService = inject(ProfessionalProfileService);
+  private readonly userService = inject(UserService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -59,11 +68,12 @@ export class LoginPage {
 
     this.authService
       .login(this.loginForm.getRawValue())
+      .pipe(switchMap((response) => this.resolvePostLoginRoute(response)))
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (response) => {
+        next: (route) => {
           this.isSubmitting = false;
-          void this.router.navigate([this.getRouteByRole(response.role)]);
+          void this.router.navigate([route]);
         },
         error: (error: unknown) => {
           this.isSubmitting = false;
@@ -121,15 +131,88 @@ export class LoginPage {
     return fallbackMessage;
   }
 
-  private getRouteByRole(role: string): string {
-    if (role === 'PROFESSIONAL') {
-      return '/professional-profile/create';
+  private resolvePostLoginRoute(response: AuthResponse): Observable<string> {
+    if (!response.role?.trim()) {
+      return of('/auth');
     }
 
-    if (role === 'PARENT') {
-      return '/patient/create';
+    return this.resolveSessionUserId(response).pipe(
+      switchMap((userId) => {
+        if (!userId) {
+          return of('/home');
+        }
+
+        if (response.role === 'PARENT') {
+          return this.patientService.getPatientsByParentId(userId).pipe(
+            switchMap((patients) => of(patients.length > 0 ? '/home' : '/patient/create')),
+          );
+        }
+
+        if (response.role === 'PROFESSIONAL') {
+          return this.professionalProfileService.getProfileByUserId(userId).pipe(
+            switchMap(() => of('/home')),
+            catchError((error: unknown) => {
+              if (this.isMissingProfessionalProfileError(error)) {
+                return of('/professional-profile/create');
+              }
+
+              throw error;
+            }),
+          );
+        }
+
+        return of('/home');
+      }),
+    );
+  }
+
+  private resolveSessionUserId(response: AuthResponse): Observable<string | null> {
+    const sessionUserId = response.userId;
+
+    if (sessionUserId) {
+      return of(sessionUserId);
     }
 
-    return '/home';
+    if (!response.email) {
+      return of(null);
+    }
+
+    return this.userService
+      .getUserByEmail(response.email)
+      .pipe(switchMap((user: UserResponse) => of(user.id)));
+  }
+
+  private isNotFoundError(error: unknown): boolean {
+    return error instanceof HttpErrorResponse && error.status === 404;
+  }
+
+  private isMissingProfessionalProfileError(error: unknown): boolean {
+    if (!(error instanceof HttpErrorResponse)) {
+      return false;
+    }
+
+    const requestUrl = error.url ?? '';
+
+    if (!requestUrl.includes('/api/professional-profiles/user/')) {
+      return false;
+    }
+
+    if (error.status === 404) {
+      return true;
+    }
+
+    if (error.status === 400) {
+      const message =
+        typeof error.error === 'object' &&
+        error.error !== null &&
+        'message' in error.error &&
+        typeof error.error.message === 'string'
+          ? error.error.message.toLowerCase()
+          : '';
+
+      return !message || message.includes('perfil profesional');
+    }
+
+    return false;
   }
 }

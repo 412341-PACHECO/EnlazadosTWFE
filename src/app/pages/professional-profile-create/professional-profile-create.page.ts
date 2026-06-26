@@ -161,15 +161,7 @@ export class ProfessionalProfileCreatePage implements AfterViewInit, OnDestroy {
         next: () => {
           this.isSubmitting = false;
           this.submitSuccess = 'El perfil profesional fue creado correctamente.';
-          this.professionalForm.reset({
-            specialty: '',
-            licenseNumber: '',
-            latitude: `${this.trelewCoordinates[0]}`,
-            longitude: `${this.trelewCoordinates[1]}`,
-            acceptedHealthInsurances: '',
-            sessionFee: '',
-          });
-          this.updateMapPosition(this.trelewCoordinates[0], this.trelewCoordinates[1]);
+          void this.router.navigate(['/home']);
         },
         error: (error: unknown) => {
           this.isSubmitting = false;

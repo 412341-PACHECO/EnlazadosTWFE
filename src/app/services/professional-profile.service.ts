@@ -30,6 +30,13 @@ export class ProfessionalProfileService {
     return this.http.get<ProfessionalProfileResponse>(`${this.profilesUrl}/user/${userId}`);
   }
 
+  getProfileByUserEmail(email: string): Observable<ProfessionalProfileResponse> {
+    const params = new HttpParams().set('email', email);
+    return this.http.get<ProfessionalProfileResponse>(`${this.profilesUrl}/search/by-user-email`, {
+      params,
+    });
+  }
+
   getAllProfiles(): Observable<ProfessionalProfileResponse[]> {
     return this.http.get<ProfessionalProfileResponse[]>(this.profilesUrl);
   }

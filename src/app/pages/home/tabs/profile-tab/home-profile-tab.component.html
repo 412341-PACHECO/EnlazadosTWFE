@@ -1,0 +1,67 @@
+<section class="tab-panel">
+  <h2>Mi Perfil</h2>
+
+  <article class="profile-card">
+    <div class="profile-card__identity">
+      <div class="profile-avatar">{{ initials }}</div>
+
+      <div class="profile-copy">
+        <h3>{{ displayName }}</h3>
+        <p>{{ roleLabel }}</p>
+        <div class="verified-row">
+          <ion-icon name="star"></ion-icon>
+          <span>Verificada · Trelew, Chubut</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-stats">
+      @for (stat of stats; track stat.label) {
+        <div class="profile-stats__item">
+          <strong>{{ stat.value }}</strong>
+          <span>{{ stat.label }}</span>
+        </div>
+      }
+    </div>
+  </article>
+
+  <article class="details-card">
+    <div class="details-row">
+      <span>{{ primaryDetailLabel }}</span>
+      <strong>{{ primaryDetailValue }}</strong>
+    </div>
+    <div class="details-row">
+      <span>{{ secondaryDetailLabel }}</span>
+      <strong>{{ secondaryDetailValue }}</strong>
+    </div>
+    <div class="details-row">
+      <span>{{ tertiaryDetailLabel }}</span>
+      <strong>{{ tertiaryDetailValue }}</strong>
+    </div>
+    <div class="details-row">
+      <span>{{ quaternaryDetailLabel }}</span>
+      <strong>{{ quaternaryDetailValue }}</strong>
+    </div>
+    <div class="details-row">
+      <span>Correo</span>
+      <strong>{{ emailLabel }}</strong>
+    </div>
+    <div class="details-row">
+      <span>Nombre</span>
+      <strong>{{ firstNameLabel }}</strong>
+    </div>
+    <div class="details-row">
+      <span>Apellido</span>
+      <strong>{{ lastNameLabel }}</strong>
+    </div>
+    <div class="details-row">
+      <span>Rol</span>
+      <strong>{{ roleLabel }}</strong>
+    </div>
+  </article>
+
+  <button class="ghost-danger-button" type="button" (click)="requestLogout()">
+    <ion-icon name="log-out-outline"></ion-icon>
+    <span>Cerrar sesion</span>
+  </button>
+</section>

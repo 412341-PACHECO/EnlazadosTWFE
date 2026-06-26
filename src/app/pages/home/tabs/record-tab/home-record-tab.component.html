@@ -1,0 +1,381 @@
+<section class="tab-panel">
+  @if (!selectedSummary) {
+    <div class="stats-grid">
+      @for (stat of stats; track stat.label) {
+        <article class="mini-stat-card">
+          <ion-icon [name]="stat.icon"></ion-icon>
+          <strong>{{ stat.value }}</strong>
+          <span>{{ stat.label }}</span>
+        </article>
+      }
+    </div>
+
+    <div class="section-headline section-headline--split">
+      <div>
+        <h2>Legajo interdisciplinario</h2>
+      </div>
+      <span class="section-meta">Actualizado ahora</span>
+    </div>
+
+    @if (isParentRole) {
+      <button type="button" class="create-team-button" (click)="openInvitationModal()">
+        <ion-icon name="add-outline"></ion-icon>
+        <span>{{ parentInvitationButtonLabel }}</span>
+      </button>
+    }
+
+    @if (loadError) {
+      <p class="feedback-message feedback-message--error">{{ loadError }}</p>
+    } @else if (invitationSuccess) {
+      <p class="feedback-message feedback-message--success">{{ invitationSuccess }}</p>
+    }
+
+    <div class="filter-row">
+      @for (filter of filters; track filter) {
+        <button
+          type="button"
+          class="filter-chip"
+          [class.filter-chip--active]="activeFilter === filter"
+          (click)="setFilter(filter)"
+        >
+          {{ filter }}
+        </button>
+      }
+    </div>
+
+    <div class="stack-list">
+      @if (isLoading) {
+        <article class="empty-state">
+          <strong>Cargando legajos...</strong>
+          <span>Estamos recuperando pacientes, equipos y reportes.</span>
+        </article>
+      } @else if (!filteredSummaries.length) {
+        <article class="empty-state">
+          <strong>No hay legajos disponibles</strong>
+          <span>
+            @if (isParentRole) {
+              Crea una invitacion para empezar a formar el equipo terapeutico.
+            } @else {
+              Todavia no tienes equipos terapeuticos asignados.
+            }
+          </span>
+        </article>
+      } @else {
+        @for (summary of filteredSummaries; track summary.patient.id) {
+          <article class="record-card record-card--summary" (click)="openSummary(summary)">
+            <div class="record-card__header">
+              <div class="record-avatar">{{ getPatientInitials(summary) }}</div>
+              <div class="record-copy">
+                <strong>{{ summary.patient.firstName }} {{ summary.patient.lastName }}</strong>
+                <span>{{ getSummaryDetails(summary) }}</span>
+                <div class="record-meta">
+                  <div class="avatar-stack">
+                    @for (professional of summary.activeTeamMembers.slice(0, 4); track professional.id) {
+                      <span>{{ getProfessionalInitials(professional) }}</span>
+                    }
+                  </div>
+                  <span>
+                    <ion-icon name="people-outline"></ion-icon>
+                    {{ summary.activeTeamMembers.length }} profesionales
+                  </span>
+                  <span>
+                    <ion-icon name="time-outline"></ion-icon>
+                    {{ getRelativeDateLabel(summary.latestReport?.createdAt ?? null) }}
+                  </span>
+                </div>
+              </div>
+              <small class="status-chip" [class.status-chip--paused]="summary.status === 'En pausa'">
+                {{ getSummaryReportBadge(summary) }}
+              </small>
+            </div>
+            <button
+              type="button"
+              class="record-footer record-footer--toggle"
+              (click)="$event.stopPropagation(); toggleSummary(summary)"
+            >
+              <span>Ultimo reporte - {{ getLatestReportAuthor(summary) }}</span>
+              <ion-icon
+                name="chevron-down-outline"
+                [class.summary-chevron--expanded]="isSummaryExpanded(summary)"
+              ></ion-icon>
+            </button>
+            @if (isSummaryExpanded(summary)) {
+              <div class="summary-preview">
+                <p>{{ getSummaryPreviewText(summary) }}</p>
+                <div class="summary-preview__meta">
+                  <span>{{ getSummaryLatestReportMeta(summary) }}</span>
+                  <button
+                    type="button"
+                    class="summary-preview__action"
+                    (click)="$event.stopPropagation(); openSummary(summary)"
+                  >
+                  {{ getSummaryFooterActionLabel(summary) }}
+                  </button>
+                </div>
+              </div>
+            }
+          </article>
+        }
+      }
+    </div>
+  } @else {
+    <div class="detail-head">
+      <div class="section-headline section-headline--detail">
+        <button type="button" class="back-button" (click)="closeSummary()">
+          <ion-icon name="arrow-back-outline"></ion-icon>
+        </button>
+
+        <div class="detail-heading">
+          <h2>{{ selectedPatientName }}</h2>
+          <span>{{ getSelectedPatientDetails() }}</span>
+        </div>
+
+        @if (isProfessionalRole) {
+          <button type="button" class="report-button" (click)="openReportModal()">
+            <ion-icon name="add-outline"></ion-icon>
+            <span>Reporte</span>
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="section-label">Equipo terapeutico · {{ selectedPatientTeamMembers.length }} profesionales</div>
+
+    <div class="stack-list">
+      <article class="team-card">
+        @for (professional of selectedPatientTeamMembers; track professional.id) {
+          <div class="member-row">
+            <div class="record-avatar record-avatar--member">{{ getProfessionalInitials(professional) }}</div>
+            <div class="member-copy">
+              <strong>{{ getProfessionalFullName(professional) }}</strong>
+              <span>{{ professional.specialty }}</span>
+            </div>
+            <small
+              class="member-status"
+              [class.member-status--reported]="getProfessionalReportStatus(professional) === 'Reporto hoy'"
+            >
+              {{ getProfessionalReportStatus(professional) }}
+            </small>
+          </div>
+        }
+      </article>
+    </div>
+
+    <div class="section-label">Reportes de hoy · {{ selectedPatientReportsToday.length }}</div>
+
+    <div class="stack-list">
+      @if (!selectedPatientReportsToday.length) {
+        <article class="empty-state">
+          <strong>Sin reportes hoy</strong>
+          <span>Cuando el equipo publique reportes apareceran en esta seccion.</span>
+        </article>
+      } @else {
+        @for (report of selectedPatientReportsToday; track report.id) {
+          <article class="report-card">
+            <div class="report-card__header">
+              <div class="record-avatar record-avatar--report">
+                {{ report.author.firstName[0] }}{{ report.author.lastName[0] }}
+              </div>
+              <div class="member-copy">
+                <strong>{{ report.author.firstName }} {{ report.author.lastName }}</strong>
+                <span>{{ getAuthorSpecialty(report) }} · {{ getReportTimestamp(report.createdAt) }}</span>
+              </div>
+              <small
+                class="report-priority"
+                [class.report-priority--medium]="report.priority === 'MEDIUM'"
+                [class.report-priority--high]="report.priority === 'HIGH'"
+              >
+                @if (report.priority === 'LOW') {
+                  Positivo
+                } @else if (report.priority === 'MEDIUM') {
+                  Neutro
+                } @else {
+                  Requiere atencion
+                }
+              </small>
+            </div>
+            <p>{{ report.content }}</p>
+          </article>
+        }
+      }
+    </div>
+
+    <div class="section-label">Reportes anteriores</div>
+
+    <div class="stack-list">
+      @if (!selectedPatientPreviousReports.length) {
+        <article class="empty-state empty-state--compact">
+          <strong>Sin historial</strong>
+          <span>Los reportes de dias anteriores apareceran aqui.</span>
+        </article>
+      } @else {
+        @for (report of selectedPatientPreviousReports; track report.id) {
+          <article class="report-card report-card--historical">
+            <div class="report-card__header">
+              <div class="record-avatar record-avatar--report record-avatar--historical">
+                {{ report.author.firstName[0] }}{{ report.author.lastName[0] }}
+              </div>
+              <div class="member-copy">
+                <strong>{{ report.author.firstName }} {{ report.author.lastName }}</strong>
+                <span>{{ getReportTimestamp(report.createdAt) }}</span>
+              </div>
+              <small
+                class="report-priority"
+                [class.report-priority--medium]="report.priority === 'MEDIUM'"
+                [class.report-priority--high]="report.priority === 'HIGH'"
+              >
+                @if (report.priority === 'LOW') {
+                  Positivo
+                } @else if (report.priority === 'MEDIUM') {
+                  Neutro
+                } @else {
+                  Requiere atencion
+                }
+              </small>
+            </div>
+            <p>{{ report.content }}</p>
+          </article>
+        }
+      }
+    </div>
+  }
+</section>
+
+@if (isCreatingInvitation) {
+  <div class="overlay">
+    <div class="modal-card">
+      <div class="modal-handle"></div>
+      <div class="modal-head">
+        <div>
+          <h3>{{ parentInvitationButtonLabel }}</h3>
+          <p>Envia una invitacion por correo a un profesional.</p>
+        </div>
+        <button type="button" class="icon-plain-button" (click)="closeInvitationModal()">
+          <ion-icon name="close-outline"></ion-icon>
+        </button>
+      </div>
+
+      <form [formGroup]="inviteForm" (ngSubmit)="submitInvitation()" class="modal-form">
+        <div class="field-group">
+          <label for="patientId">Paciente</label>
+          <div class="select-shell" [class.select-shell--error]="hasInviteControlError('patientId')">
+            <select id="patientId" formControlName="patientId">
+              <option value="">Selecciona un paciente</option>
+              @for (summary of summaries; track summary.patient.id) {
+                <option [value]="summary.patient.id">
+                  {{ summary.patient.firstName }} {{ summary.patient.lastName }}
+                </option>
+              }
+            </select>
+            <ion-icon name="chevron-down-outline"></ion-icon>
+          </div>
+          @if (hasInviteControlError('patientId')) {
+            <p class="field-error">{{ getInviteControlErrorMessage('patientId') }}</p>
+          }
+        </div>
+
+        <div class="field-group">
+          <label for="invitedEmail">Correo profesional</label>
+          <input id="invitedEmail" type="email" formControlName="invitedEmail" placeholder="profesional@email.com" />
+          @if (hasInviteControlError('invitedEmail')) {
+            <p class="field-error">{{ getInviteControlErrorMessage('invitedEmail') }}</p>
+          }
+        </div>
+
+        <div class="field-grid">
+          <div class="field-group">
+            <label for="startDate">Fecha inicio</label>
+            <input id="startDate" type="date" formControlName="startDate" />
+            @if (hasInviteControlError('startDate')) {
+              <p class="field-error">{{ getInviteControlErrorMessage('startDate') }}</p>
+            }
+          </div>
+
+          <div class="field-group">
+            <label for="endDate">Fecha fin</label>
+            <input id="endDate" type="date" formControlName="endDate" />
+          </div>
+        </div>
+
+        @if (invitationError) {
+          <p class="feedback-message feedback-message--error">{{ invitationError }}</p>
+        }
+
+        <button class="primary-button" type="submit" [disabled]="isSubmittingInvitation">
+          <ion-icon name="paper-plane-outline"></ion-icon>
+          <span>{{ isSubmittingInvitation ? 'Enviando...' : 'Enviar invitacion' }}</span>
+        </button>
+      </form>
+    </div>
+  </div>
+}
+
+@if (isCreatingReport) {
+  <div class="overlay">
+    <div class="modal-card">
+      <div class="modal-handle"></div>
+      <div class="modal-head">
+        <div>
+          <h3>Nuevo reporte diario</h3>
+          <p>Equipo de {{ selectedPatientName }}</p>
+        </div>
+        <button type="button" class="icon-plain-button" (click)="closeReportModal()">
+          <ion-icon name="close-outline"></ion-icon>
+        </button>
+      </div>
+
+      <form [formGroup]="reportForm" (ngSubmit)="submitReport()" class="modal-form">
+        <div class="field-group">
+          <label>Estado de la sesion</label>
+          <div class="priority-row">
+            <button
+              type="button"
+              class="priority-chip"
+              [class.priority-chip--active]="isPrioritySelected('LOW')"
+              (click)="selectPriority('LOW')"
+            >
+              Positivo
+            </button>
+            <button
+              type="button"
+              class="priority-chip"
+              [class.priority-chip--active]="isPrioritySelected('MEDIUM')"
+              (click)="selectPriority('MEDIUM')"
+            >
+              Neutro
+            </button>
+            <button
+              type="button"
+              class="priority-chip priority-chip--warning"
+              [class.priority-chip--active]="isPrioritySelected('HIGH')"
+              (click)="selectPriority('HIGH')"
+            >
+              Requiere atencion
+            </button>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label for="content">Observaciones</label>
+          <textarea
+            id="content"
+            formControlName="content"
+            placeholder="Describi las observaciones de la sesion de hoy..."
+          ></textarea>
+          @if (hasReportControlError()) {
+            <p class="field-error">{{ getReportControlErrorMessage() }}</p>
+          }
+        </div>
+
+        @if (reportError) {
+          <p class="feedback-message feedback-message--error">{{ reportError }}</p>
+        }
+
+        <button class="primary-button primary-button--report" type="submit" [disabled]="isSubmittingReport">
+          <ion-icon name="paper-plane-outline"></ion-icon>
+          <span>{{ isSubmittingReport ? 'Publicando...' : 'Publicar reporte' }}</span>
+        </button>
+      </form>
+    </div>
+  </div>
+}

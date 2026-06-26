@@ -1,0 +1,30 @@
+<section class="tab-panel">
+  <h2>Documentos PDF</h2>
+
+  <article class="upload-card">
+    <div class="upload-card__icon">
+      <ion-icon name="cloud-upload-outline"></ion-icon>
+    </div>
+    <strong>Subir documento PDF</strong>
+    <span>Informes, planes, evaluaciones...</span>
+  </article>
+
+  <div class="section-headline">
+    <h3>Documentos recientes</h3>
+  </div>
+
+  <div class="stack-list">
+    @for (document of items; track document.title) {
+      <article class="list-card">
+        <div class="list-card__icon" [attr.data-accent]="document.accent">
+          <ion-icon name="document-text-outline"></ion-icon>
+        </div>
+        <div class="list-card__copy">
+          <strong>{{ document.title }}</strong>
+          <span>{{ document.meta }}</span>
+        </div>
+        <small class="document-tag" [attr.data-accent]="document.accent">{{ document.type }}</small>
+      </article>
+    }
+  </div>
+</section>

@@ -3,7 +3,12 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../environments/environment';
-import { UserCreateRequest, UserResponse, UserUpdateRequest } from '../models';
+import {
+  ParentProfileResponse,
+  UserCreateRequest,
+  UserResponse,
+  UserUpdateRequest,
+} from '../models';
 
 @Injectable({
   providedIn: 'root',
@@ -23,6 +28,15 @@ export class UserService {
   getUserByEmail(email: string): Observable<UserResponse> {
     const params = new HttpParams().set('email', email);
     return this.http.get<UserResponse>(`${this.usersUrl}/search/by-email`, { params });
+  }
+
+  getParentProfileById(id: string): Observable<ParentProfileResponse> {
+    return this.http.get<ParentProfileResponse>(`${this.usersUrl}/parents/${id}`);
+  }
+
+  getParentProfileByEmail(email: string): Observable<ParentProfileResponse> {
+    const params = new HttpParams().set('email', email);
+    return this.http.get<ParentProfileResponse>(`${this.usersUrl}/parents/search/by-email`, { params });
   }
 
   getAllUsers(): Observable<UserResponse[]> {

@@ -89,17 +89,7 @@ export class PatientCreatePage implements OnInit {
         next: () => {
           this.isSubmitting = false;
           this.submitSuccess = 'El paciente fue creado correctamente.';
-          const parentSnapshot = this.patientForm.controls.parentDisplay.getRawValue();
-          const parentIdSnapshot = this.patientForm.controls.parentId.getRawValue();
-
-          this.patientForm.reset({
-            firstName: '',
-            lastName: '',
-            diagnosis: '',
-            institutionId: '',
-            parentId: parentIdSnapshot,
-            parentDisplay: parentSnapshot,
-          });
+          void this.router.navigate(['/home']);
         },
         error: (error: unknown) => {
           this.isSubmitting = false;

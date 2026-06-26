@@ -1,0 +1,97 @@
+<ion-content [fullscreen]="true" class="invite-content">
+  <section class="invite-shell">
+    <div class="invite-brand">
+      <div class="invite-brand__badge">
+        <ion-icon name="heart"></ion-icon>
+      </div>
+      <h1>Invitación a equipo</h1>
+      <p>Confirma tu participación en el equipo terapéutico</p>
+    </div>
+
+    <div class="invite-card">
+      @if (isLoading) {
+        <div class="state-panel">
+          <ion-spinner name="crescent"></ion-spinner>
+          <div>
+            <h2>Validando invitación</h2>
+            <p>Estamos revisando el enlace enviado por correo.</p>
+          </div>
+        </div>
+      } @else if (loadError) {
+        <div class="state-panel state-panel--error">
+          <ion-icon name="warning-outline"></ion-icon>
+          <div>
+            <h2>Invitación inválida</h2>
+            <p>{{ loadError }}</p>
+          </div>
+        </div>
+      } @else if (tokenInfo) {
+        <div class="state-panel">
+          <ion-icon name="mail-open-outline"></ion-icon>
+          <div>
+            <h2>{{ tokenInfo.patientFullName }}</h2>
+            <p>{{ tokenInfo.invitedByFullName }} te invitó a sumarte al equipo terapéutico.</p>
+          </div>
+        </div>
+
+        <article class="info-card">
+          <div class="info-row">
+            <span>Correo invitado</span>
+            <strong>{{ tokenInfo.invitedEmail }}</strong>
+          </div>
+          <div class="info-row">
+            <span>Estado</span>
+            <strong>{{ tokenInfo.status }}</strong>
+          </div>
+          <div class="info-row">
+            <span>Inicio</span>
+            <strong>{{ tokenInfo.startDate | date: 'dd/MM/yyyy' }}</strong>
+          </div>
+          <div class="info-row">
+            <span>Fin</span>
+            <strong>
+              @if (tokenInfo.endDate) {
+                {{ tokenInfo.endDate | date: 'dd/MM/yyyy' }}
+              } @else {
+                Sin fecha
+              }
+            </strong>
+          </div>
+          <div class="info-row">
+            <span>Expira</span>
+            <strong>{{ tokenInfo.expiresAt | date: 'dd/MM/yyyy HH:mm' }}</strong>
+          </div>
+        </article>
+
+        @if (acceptError) {
+          <p class="feedback-message feedback-message--error">{{ acceptError }}</p>
+        }
+
+        @if (acceptSuccess) {
+          <p class="feedback-message feedback-message--success">{{ acceptSuccess }}</p>
+        }
+
+        @if (canAccept) {
+          <button class="primary-button" type="button" [disabled]="isAccepting" (click)="acceptInvitation()">
+            @if (isAccepting) {
+              <ion-spinner name="crescent"></ion-spinner>
+            } @else {
+              <ion-icon name="person-add-outline"></ion-icon>
+            }
+            <span>{{ isAccepting ? 'Aceptando...' : 'Aceptar invitación' }}</span>
+          </button>
+        } @else {
+          <div class="state-panel state-panel--success">
+            <ion-icon name="checkmark-circle-outline"></ion-icon>
+            <div>
+              <h2>Invitación no disponible</h2>
+              <p>Este enlace ya fue usado o dejó de estar vigente.</p>
+            </div>
+          </div>
+        }
+      }
+
+      <a class="back-link" routerLink="/login">Volver a iniciar sesión</a>
+    </div>
+  </section>
+</ion-content>

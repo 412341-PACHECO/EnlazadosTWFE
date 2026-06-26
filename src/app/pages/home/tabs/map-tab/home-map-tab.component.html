@@ -1,0 +1,36 @@
+<section class="tab-panel">
+  <h2>Mapa de ubicaciones</h2>
+
+  <article class="map-card">
+    <div class="map-orb map-orb--blue"></div>
+    <div class="map-orb map-orb--green"></div>
+    <div class="map-orb map-orb--amber"></div>
+    <div class="map-pin">
+      <ion-icon name="location-outline"></ion-icon>
+    </div>
+    <div class="map-copy">
+      <strong>Trelew, Chubut</strong>
+      <span>Mapa interactivo próximamente</span>
+    </div>
+  </article>
+
+  <div class="section-headline">
+    <h3>Ubicaciones registradas</h3>
+  </div>
+
+  <div class="stack-list">
+    @for (location of locations; track location.name) {
+      <article class="list-card">
+        <div class="list-card__icon" [attr.data-accent]="location.accent">
+          <ion-icon name="location-outline"></ion-icon>
+        </div>
+        <div class="list-card__copy">
+          <strong>{{ location.name }}</strong>
+          <span>{{ location.address }}</span>
+          <small>{{ location.type }}</small>
+        </div>
+        <ion-icon name="chevron-forward-outline"></ion-icon>
+      </article>
+    }
+  </div>
+</section>

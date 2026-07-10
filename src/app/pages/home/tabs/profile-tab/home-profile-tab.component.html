@@ -42,18 +42,20 @@
       <span>{{ quaternaryDetailLabel }}</span>
       <strong>{{ quaternaryDetailValue }}</strong>
     </div>
-    <div class="details-row">
-      <span>Correo</span>
-      <strong>{{ emailLabel }}</strong>
-    </div>
-    <div class="details-row">
-      <span>Nombre</span>
-      <strong>{{ firstNameLabel }}</strong>
-    </div>
-    <div class="details-row">
-      <span>Apellido</span>
-      <strong>{{ lastNameLabel }}</strong>
-    </div>
+    @if (isProfessionalRole) {
+      <div class="details-row">
+        <span>Correo</span>
+        <strong>{{ emailLabel }}</strong>
+      </div>
+      <div class="details-row">
+        <span>Nombre</span>
+        <strong>{{ firstNameLabel }}</strong>
+      </div>
+      <div class="details-row">
+        <span>Apellido</span>
+        <strong>{{ lastNameLabel }}</strong>
+      </div>
+    }
     <div class="details-row">
       <span>Rol</span>
       <strong>{{ roleLabel }}</strong>

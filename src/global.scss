@@ -26,6 +26,15 @@
 @import "@ionic/angular/css/flex-utils.css";
 @import "leaflet/dist/leaflet.css";
 
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  overflow-x: hidden;
+}
+
 /**
  * Ionic Dark Mode
  * -----------------------------------------------------
@@ -36,3 +45,39 @@
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import '@ionic/angular/css/palettes/dark.system.css';
+
+app-home-map-tab{
+  .map-marker-shell{background:transparent;border:0}
+  .map-marker{width:30px;height:30px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:grid;place-items:center;color:#fff;font-size:.72rem;font-weight:800;box-shadow:0 10px 24px rgba(17,40,74,.24)}
+  .map-marker::before{content:'';transform:rotate(45deg)}
+  .map-marker--person{position:relative;width:34px;height:42px;border-radius:0;transform:none;display:block;box-shadow:none;background:transparent}
+  .map-marker--person::before{content:'';position:absolute;left:50%;bottom:1px;width:15px;height:15px;background:#1bc3a3;border-radius:0 0 4px 0;transform:translateX(-50%) rotate(45deg);box-shadow:0 10px 24px rgba(17,40,74,.24)}
+  .map-marker--person::after{content:'';position:absolute;inset:0 auto auto 0;width:34px;height:34px;border-radius:50%;background:#1bc3a3;box-shadow:0 10px 24px rgba(17,40,74,.24)}
+  .map-marker__person-head,.map-marker__person-body{position:absolute;left:50%;background:#fff;transform:translateX(-50%);z-index:1}
+  .map-marker__person-head{top:8px;width:9px;height:9px;border-radius:50%}
+  .map-marker__person-body{top:18px;width:16px;height:9px;border-radius:10px 10px 7px 7px}
+  .map-marker--professional{background:#1bc3a3}
+  .map-marker--school{position:relative;background:linear-gradient(180deg,#5ea5ff 0%,#3f89f5 100%)}
+  .map-marker--office{background:#8a7cff}
+  .map-marker--query{background:#f5a623}
+  .map-marker--other{background:#78889b}
+  .map-marker__school-cap,.map-marker__school-band,.map-marker__school-tassel{position:absolute;transform:rotate(45deg)}
+  .map-marker__school-cap{top:7px;left:6px;width:18px;height:18px;background:#fff;border-radius:3px}
+  .map-marker__school-band{top:17px;left:9px;width:12px;height:4px;background:#d8e7ff;border-radius:999px}
+  .map-marker__school-tassel{top:11px;left:19px;width:2px;height:10px;background:#fff4b0;border-radius:999px;box-shadow:0 9px 0 0 #fff4b0;transform-origin:top center}
+  .leaflet-popup-content{margin:0;min-width:248px}
+  .map-popup{display:grid;gap:14px;padding:14px;min-width:248px;background:#fff}
+  .map-popup__header{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center}
+  .map-popup__avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#e8fbf6;color:#17a97d;font-size:.92rem;font-weight:800}
+  .map-popup__avatar--institution{background:#eef4ff;color:#4a94ff}
+  .map-popup strong{color:#11284a;font-size:1rem;line-height:1.2}
+  .map-popup__identity span{color:#1097ba;font-size:.9rem;font-weight:700}
+  .map-popup__details{display:grid;gap:10px;padding-top:12px;border-top:1px solid rgba(17,40,74,.08)}
+  .map-popup__row{display:grid;gap:3px}
+  .map-popup__row label{color:#8a98ad;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+  .map-popup__row small{color:#6d7c92;font-size:.92rem;line-height:1.45}
+  .map-popup__actions{padding-top:12px;border-top:1px solid rgba(17,40,74,.08)}
+  .map-popup__cta{width:100%;min-height:42px;border:0;border-radius:14px;background:linear-gradient(180deg,#0fa6c9 0%,#1195b7 100%);color:#fff;font-weight:700}
+  .leaflet-popup-content-wrapper{padding:0;border-radius:20px;box-shadow:0 18px 36px rgba(13,35,68,.16)}
+  .leaflet-popup-tip{box-shadow:none}
+}

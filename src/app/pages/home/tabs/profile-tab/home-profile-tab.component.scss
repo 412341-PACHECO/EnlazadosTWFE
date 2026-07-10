@@ -55,6 +55,9 @@
   margin: 0 0 4px;
   color: #fff;
   font-size: 1.55rem;
+  line-height: 1.08;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .profile-copy p {
@@ -125,6 +128,8 @@
 .details-row strong {
   color: var(--dash-ink);
   text-align: right;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .ghost-danger-button {
@@ -138,4 +143,38 @@
   background: transparent;
   color: var(--dash-danger);
   font-weight: 700;
+}
+
+@media (max-width: 520px) {
+  .profile-card {
+    padding: 18px;
+  }
+
+  .profile-card__identity {
+    gap: 12px;
+    align-items: start;
+  }
+
+  .profile-avatar {
+    width: 54px;
+    height: 54px;
+    font-size: 1.25rem;
+  }
+
+  .profile-copy h3 {
+    font-size: 1.1rem;
+  }
+
+  .profile-copy p,
+  .verified-row {
+    font-size: 0.9rem;
+  }
+
+  .details-row {
+    align-items: start;
+  }
+
+  .details-row strong {
+    max-width: 58%;
+  }
 }

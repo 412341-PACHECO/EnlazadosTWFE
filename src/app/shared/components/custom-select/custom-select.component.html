@@ -1,0 +1,47 @@
+<div
+  class="custom-select"
+  [class.custom-select--open]="isOpen"
+  [class.custom-select--disabled]="disabled"
+  [class.custom-select--green]="theme === 'green'"
+>
+  <button type="button" class="custom-select__trigger" [disabled]="disabled" (click)="toggleDropdown()">
+    <span class="custom-select__label" [class.custom-select__label--placeholder]="!hasValue">
+      {{ selectedLabel }}
+    </span>
+    <span class="custom-select__chevron" aria-hidden="true"></span>
+  </button>
+
+  @if (isOpen) {
+    <div class="custom-select__panel">
+      @if (searchable) {
+        <div class="custom-select__search">
+          <input
+            #searchInput
+            type="text"
+            [value]="searchTerm"
+            [placeholder]="searchPlaceholder"
+            (input)="onSearchInput($event)"
+          />
+        </div>
+      }
+
+      @for (option of filteredOptions; track $index) {
+        <button
+          type="button"
+          class="custom-select__option"
+          [class.custom-select__option--selected]="isSelected(option)"
+          (click)="selectOption(option)"
+        >
+          <span>{{ option.label }}</span>
+          @if (isSelected(option)) {
+            <span class="custom-select__check" aria-hidden="true"></span>
+          }
+        </button>
+      }
+
+      @if (!filteredOptions.length) {
+        <div class="custom-select__empty">No hay resultados para esa búsqueda.</div>
+      }
+    </div>
+  }
+</div>

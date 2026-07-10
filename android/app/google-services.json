@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "782049087549",
+    "project_id": "enlazadostw",
+    "storage_bucket": "enlazadostw.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:782049087549:android:ce4af25f807fee681eda54",
+        "android_client_info": {
+          "package_name": "com.enlazadostw.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAbln5qWMfFNBtLTG01nQJ81y8zL9zkk1o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, inject } from '@angular/core';
+import { Component, DestroyRef, ElementRef, ViewChild, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -7,7 +7,7 @@ import { IonContent, IonIcon, IonSpinner } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
   briefcaseOutline,
-  chevronDownOutline,
+  closeOutline,
   eyeOffOutline,
   eyeOutline,
   heart,
@@ -18,6 +18,8 @@ import {
 } from 'ionicons/icons';
 
 import { RoleBasic } from '../../models';
+import { CustomSelectOption } from '../../shared/components/custom-select/custom-select.component';
+import { CustomSelectComponent } from '../../shared/components/custom-select/custom-select.component';
 import { RoleService } from '../../services/role.service';
 import { UserService } from '../../services/user.service';
 
@@ -37,9 +39,11 @@ const passwordMatchValidator: ValidatorFn = (control) => {
   templateUrl: './auth.page.html',
   styleUrls: ['./auth.page.scss'],
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, IonContent, IonIcon, IonSpinner],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, IonContent, IonIcon, IonSpinner, CustomSelectComponent],
 })
 export class AuthPage {
+  @ViewChild('termsScrollContainer') private termsScrollContainer?: ElementRef<HTMLDivElement>;
+
   private readonly formBuilder = inject(FormBuilder);
   private readonly roleService = inject(RoleService);
   private readonly userService = inject(UserService);
@@ -54,6 +58,62 @@ export class AuthPage {
   protected submitError = '';
   protected submitSuccess = '';
   protected roleLoadError = '';
+  protected isTermsModalOpen = false;
+  protected hasReachedTermsBottom = false;
+
+  protected readonly termsSections = [
+    {
+      title: 'Bienvenida y aceptacion',
+      paragraphs: [
+        'Bienvenido a EnlazadosTW, una plataforma digital desarrollada por Jonas Pacheco para facilitar el seguimiento interdisciplinario, la coordinacion terapeutica y la comunicacion entre familias, profesionales e instituciones.',
+        'Al acceder y utilizar EnlazadosTW, usted expresa su consentimiento, acuerdo y entendimiento de estos Terminos y Condiciones y de la Politica de Privacidad aplicable. Si no esta de acuerdo con estos terminos, no debe utilizar la plataforma.',
+        'El uso del servicio implica la aceptacion de las modalidades operativas vigentes y de aquellas que puedan habilitarse en el futuro dentro del alcance funcional de la aplicacion.',
+      ],
+    },
+    {
+      title: 'Operaciones habilitadas',
+      paragraphs: [
+        'EnlazadosTW permite, segun el rol del usuario, registrar cuentas, verificar identidad por correo electronico, cargar perfiles profesionales, registrar pacientes, gestionar equipos terapeuticos, enviar invitaciones, aceptar integraciones, geolocalizar profesionales e instituciones y crear reportes diarios de seguimiento.',
+        'Las funcionalidades disponibles podran ampliarse, modificarse o restringirse de acuerdo con la evolucion de la plataforma, necesidades tecnicas, criterios de seguridad o mejoras del servicio.',
+      ],
+    },
+    {
+      title: 'Acceso y credenciales',
+      paragraphs: [
+        'Para operar EnlazadosTW se requiere una cuenta valida y una direccion de correo electronico autentica. El usuario es responsable de mantener la confidencialidad de su contraseña y de cualquier mecanismo adicional de autenticacion.',
+        'La clave personal es secreta e intransferible. El usuario asume las consecuencias derivadas de su divulgacion a terceros y libera a EnlazadosTW y a Jonas Pacheco de la responsabilidad por accesos indebidos originados por negligencia en su resguardo.',
+        'EnlazadosTW nunca solicitara por correo electronico la contraseña completa ni informacion sensible innecesaria para operar la plataforma.',
+      ],
+    },
+    {
+      title: 'Validez operativa',
+      paragraphs: [
+        'Los registros generados por la plataforma constituiran prueba suficiente de las operaciones realizadas por los usuarios dentro del sistema, incluyendo altas, invitaciones, aceptaciones y reportes interdisciplinarios.',
+        'Las notificaciones emitidas por medios digitales dentro de la plataforma o mediante correo electronico tendran la misma validez operativa que una comunicacion escrita, cuando la normativa aplicable lo permita.',
+      ],
+    },
+    {
+      title: 'Privacidad y tratamiento de datos',
+      paragraphs: [
+        'Para utilizar EnlazadosTW, los usuarios deben proporcionar determinados datos personales y profesionales. Esa informacion sera tratada exclusivamente para prestar el servicio, mejorar la experiencia, sostener la seguridad operativa y permitir la coordinacion interdisciplinaria entre los actores autorizados.',
+        'Los datos podran almacenarse en infraestructura tecnologica administrada con medidas razonables de seguridad tecnica y organizativa. Cada usuario se compromete a utilizar la informacion a la que acceda unicamente para fines vinculados al seguimiento terapeutico y dentro de su autorizacion funcional.',
+      ],
+    },
+    {
+      title: 'Propiedad intelectual',
+      paragraphs: [
+        'El software, la interfaz, los textos, flujos, diseños y desarrollos de EnlazadosTW se encuentran protegidos por la normativa argentina aplicable en materia de propiedad intelectual, incluyendo la Ley 11.723.',
+        'No esta permitida la copia, reproduccion, distribucion, ingenieria inversa o explotacion comercial del sistema sin autorizacion expresa del desarrollador.',
+      ],
+    },
+    {
+      title: 'Vigencia y cambios',
+      paragraphs: [
+        'El usuario puede dejar de utilizar el servicio en cualquier momento. EnlazadosTW podra suspender o cancelar cuentas que incumplan estos terminos, vulneren la seguridad de la plataforma o hagan un uso indebido de la informacion.',
+        'Estos terminos podran actualizarse para reflejar cambios funcionales, legales o de seguridad. La continuidad en el uso de la plataforma luego de una actualizacion implicara la aceptacion de la nueva version vigente.',
+      ],
+    },
+  ];
 
   protected readonly registrationForm = this.formBuilder.nonNullable.group(
     {
@@ -71,7 +131,7 @@ export class AuthPage {
   constructor() {
     addIcons({
       briefcaseOutline,
-      chevronDownOutline,
+      closeOutline,
       eyeOffOutline,
       eyeOutline,
       heart,
@@ -94,6 +154,34 @@ export class AuthPage {
     }
 
     return 'Selecciona el rol profesional con el que vas a registrarte.';
+  }
+
+  protected get visibleRoles(): RoleBasic[] {
+    return this.roles.filter((role) => role.name.toUpperCase() !== 'ADMIN');
+  }
+
+  protected get roleOptions(): CustomSelectOption<string>[] {
+    return [
+      { label: 'Selecciona tu rol', value: '' },
+      ...this.visibleRoles.map((role) => ({
+        label: this.getRoleLabel(role.name),
+        value: role.id,
+      })),
+    ];
+  }
+
+  protected getRoleLabel(roleName: string): string {
+    const normalizedRole = roleName.toUpperCase();
+
+    if (normalizedRole === 'PROFESSIONAL') {
+      return 'Profesional';
+    }
+
+    if (normalizedRole === 'PARENT') {
+      return 'Familia';
+    }
+
+    return roleName;
   }
 
   protected onSubmit(): void {
@@ -149,6 +237,36 @@ export class AuthPage {
 
   protected toggleConfirmPasswordVisibility(): void {
     this.showConfirmPassword = !this.showConfirmPassword;
+  }
+
+  protected openTermsModal(): void {
+    this.isTermsModalOpen = true;
+    this.hasReachedTermsBottom = false;
+  }
+
+  protected closeTermsModal(): void {
+    this.isTermsModalOpen = false;
+  }
+
+  protected onTermsScroll(): void {
+    const container = this.termsScrollContainer?.nativeElement;
+
+    if (!container) {
+      return;
+    }
+
+    const scrollBottom = container.scrollTop + container.clientHeight;
+    this.hasReachedTermsBottom = scrollBottom >= container.scrollHeight - 8;
+  }
+
+  protected acceptTermsFromModal(): void {
+    if (!this.hasReachedTermsBottom) {
+      return;
+    }
+
+    this.registrationForm.controls.acceptTerms.setValue(true);
+    this.registrationForm.controls.acceptTerms.markAsTouched();
+    this.closeTermsModal();
   }
 
   protected hasControlError(

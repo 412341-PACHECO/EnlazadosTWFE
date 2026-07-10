@@ -8,4 +8,5 @@ export interface ProfessionalProfile {
   longitude: number;
   acceptedHealthInsurances: string[];
   sessionFee: number;
+  coverageRadiusKm: number | null;
 }

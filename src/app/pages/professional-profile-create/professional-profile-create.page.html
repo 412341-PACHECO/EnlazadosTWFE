@@ -86,6 +86,48 @@
           </p>
         </div>
 
+        @if (requiresCoverageRadius) {
+          <section class="coverage-card">
+            <div class="coverage-card__header">
+              <strong>Radio de cobertura</strong>
+              <span>{{ coverageRadiusLabel }}</span>
+            </div>
+
+            <div class="coverage-range">
+              <input
+                id="coverageRadiusKm"
+                type="range"
+                formControlName="coverageRadiusKm"
+                min="0.5"
+                max="15"
+                step="0.5"
+              />
+            </div>
+
+            <div class="coverage-scale">
+              <small>{{ coverageMinLabel }}</small>
+              <small>{{ coverageMaxLabel }}</small>
+            </div>
+
+            <div class="coverage-coordinates">
+              <article class="coverage-coordinate">
+                <span>Latitud</span>
+                <strong>{{ professionalForm.controls.latitude.value }}</strong>
+              </article>
+              <article class="coverage-coordinate">
+                <span>Longitud</span>
+                <strong>{{ professionalForm.controls.longitude.value }}</strong>
+              </article>
+            </div>
+
+            @if (hasControlError('coverageRadiusKm')) {
+              <p class="field-error">
+                {{ getControlErrorMessage('coverageRadiusKm') }}
+              </p>
+            }
+          </section>
+        }
+
         <div class="field-group">
           <label for="acceptedHealthInsurances">Obras sociales</label>
           <div
@@ -120,6 +162,12 @@
             <p class="field-error">{{ getControlErrorMessage('sessionFee') }}</p>
           }
         </div>
+
+        @if (requiresCoverageRadius && hasControlError('coverageRadiusKm')) {
+          <p class="submit-message submit-message--error">
+            El radio de cobertura es obligatorio para la especialidad Acompanante Terapeutico.
+          </p>
+        }
 
         @if (submitError) {
           <p class="submit-message submit-message--error">{{ submitError }}</p>

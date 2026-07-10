@@ -135,6 +135,7 @@ form {
 }
 
 .input-shell input,
+.input-shell select,
 .input-shell textarea {
   width: 100%;
   border: 0;
@@ -143,6 +144,29 @@ form {
   color: var(--patient-ink);
   font-size: 1rem;
   resize: none;
+}
+
+.select-field {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: 12px;
+  align-items: center;
+}
+
+.select-field__icon {
+  display: grid;
+  place-items: center;
+}
+
+.select-field__icon ion-icon {
+  color: var(--patient-muted);
+  font-size: 1.2rem;
+}
+
+.select-field--error app-custom-select {
+  display: block;
+  border-radius: 22px;
+  box-shadow: 0 0 0 4px rgba(214, 69, 69, 0.08);
 }
 
 .input-shell input[readonly] {

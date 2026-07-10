@@ -259,15 +259,11 @@
         <div class="field-group">
           <label for="patientId">Paciente</label>
           <div class="select-shell" [class.select-shell--error]="hasInviteControlError('patientId')">
-            <select id="patientId" formControlName="patientId">
-              <option value="">Selecciona un paciente</option>
-              @for (summary of summaries; track summary.patient.id) {
-                <option [value]="summary.patient.id">
-                  {{ summary.patient.firstName }} {{ summary.patient.lastName }}
-                </option>
-              }
-            </select>
-            <ion-icon name="chevron-down-outline"></ion-icon>
+            <app-custom-select
+              formControlName="patientId"
+              [options]="invitePatientOptions"
+              theme="blue"
+            ></app-custom-select>
           </div>
           @if (hasInviteControlError('patientId')) {
             <p class="field-error">{{ getInviteControlErrorMessage('patientId') }}</p>

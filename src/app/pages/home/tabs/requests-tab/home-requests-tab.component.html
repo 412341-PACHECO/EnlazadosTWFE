@@ -1,0 +1,77 @@
+<section class="tab-panel">
+  <div class="section-headline">
+    <div>
+      <h2>Solicitudes</h2>
+      <p>Contactos recibidos desde el mapa profesional.</p>
+    </div>
+  </div>
+
+  @if (isLoading) {
+    <article class="empty-state">
+      <strong>Cargando solicitudes...</strong>
+      <span>Estamos recuperando los contactos recientes enviados por las familias.</span>
+    </article>
+  }
+
+  @if (loadError) {
+    <article class="empty-state empty-state--error">
+      <strong>No se pudieron cargar las solicitudes</strong>
+      <span>{{ loadError }}</span>
+    </article>
+  }
+
+  @if (!isLoading && !loadError && requests.length) {
+    <div class="stack-list">
+      @for (request of requests; track trackRequest($index, request)) {
+        <article class="request-card" [class.request-card--viewed]="request.status === 'VIEWED'">
+          <div class="request-card__header">
+            <div class="request-avatar">
+              <ion-icon name="person-add-outline"></ion-icon>
+            </div>
+
+            <div class="request-copy">
+              <strong>{{ request.parentFullName }}</strong>
+              <span>{{ request.patientFullName || 'Paciente no especificado' }}</span>
+            </div>
+
+            <div class="request-meta">
+              <small>{{ getRequestTimestamp(request.createdAt) }}</small>
+              <span class="request-badge" [class.request-badge--viewed]="request.status === 'VIEWED'">
+                <ion-icon [name]="request.status === 'VIEWED' ? 'checkmark-circle-outline' : 'time-outline'"></ion-icon>
+                <span>{{ getStatusLabel(request.status) }}</span>
+              </span>
+            </div>
+          </div>
+
+          <p>
+            {{
+              request.message ||
+                'La familia quiere comunicarse con vos para coordinar servicios terapéuticos.'
+            }}
+          </p>
+
+          <div class="request-actions">
+            @if (request.parentEmail) {
+              <a class="contact-chip" [href]="'mailto:' + request.parentEmail">
+                <ion-icon name="mail-outline"></ion-icon>
+                <span>{{ request.parentEmail }}</span>
+              </a>
+            }
+
+            @if (request.parentPhone) {
+              <a class="contact-chip contact-chip--phone" [href]="'tel:' + request.parentPhone">
+                <ion-icon name="call-outline"></ion-icon>
+                <span>{{ request.parentPhone }}</span>
+              </a>
+            }
+          </div>
+        </article>
+      }
+    </div>
+  } @else if (!isLoading && !loadError) {
+    <article class="empty-state">
+      <strong>Sin solicitudes todavía</strong>
+      <span>Cuando una familia solicite contacto desde el mapa aparecerá en esta sección.</span>
+    </article>
+  }
+</section>

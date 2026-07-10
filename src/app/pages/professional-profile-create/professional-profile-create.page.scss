@@ -95,11 +95,137 @@ form {
   width: 100%;
 }
 
+:host ::ng-deep .professional-marker-shell {
+  background: transparent;
+  border: 0;
+}
+
+:host ::ng-deep .professional-marker {
+  position: relative;
+  width: 34px;
+  height: 42px;
+  display: block;
+  background: transparent;
+  box-shadow: none;
+}
+
+:host ::ng-deep .professional-marker::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 1px;
+  width: 15px;
+  height: 15px;
+  background: linear-gradient(180deg, #1db2d2 0%, #0f85a7 100%);
+  border-radius: 0 0 4px 0;
+  transform: translateX(-50%) rotate(45deg);
+  box-shadow: 0 10px 24px rgba(16, 33, 61, 0.24);
+}
+
+:host ::ng-deep .professional-marker::after {
+  content: '';
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #1db2d2 0%, #0f85a7 100%);
+  box-shadow: 0 10px 24px rgba(16, 33, 61, 0.24);
+}
+
+:host ::ng-deep .professional-marker__head,
+:host ::ng-deep .professional-marker__body {
+  position: absolute;
+  left: 50%;
+  background: #fff;
+  transform: translateX(-50%);
+  z-index: 1;
+}
+
+:host ::ng-deep .professional-marker__head {
+  top: 8px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+:host ::ng-deep .professional-marker__body {
+  top: 18px;
+  width: 16px;
+  height: 9px;
+  border-radius: 10px 10px 7px 7px;
+}
+
 .map-hint {
   margin: 0;
   color: var(--professional-muted);
   font-size: 0.9rem;
   line-height: 1.5;
+}
+
+.coverage-card {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 20px;
+  border: 1px solid var(--professional-border);
+  background: linear-gradient(180deg, #ffffff 0%, #f8fcff 100%);
+  box-shadow: 0 16px 28px rgba(16, 33, 61, 0.08);
+}
+
+.coverage-card__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+
+.coverage-card__header strong {
+  color: var(--professional-ink);
+  font-size: 1.05rem;
+}
+
+.coverage-card__header span {
+  color: var(--professional-accent);
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.coverage-range input[type='range'] {
+  width: 100%;
+  accent-color: var(--professional-accent);
+}
+
+.coverage-scale {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: #8a98ad;
+}
+
+.coverage-coordinates {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.coverage-coordinate {
+  display: grid;
+  gap: 6px;
+  padding: 14px;
+  border-radius: 18px;
+  background: #f1f5fb;
+}
+
+.coverage-coordinate span {
+  color: #7e8da4;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.coverage-coordinate strong {
+  color: var(--professional-ink);
+  font-size: 1.05rem;
 }
 
 .field-grid {
@@ -226,6 +352,10 @@ form {
   }
 
   .field-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .coverage-coordinates {
     grid-template-columns: 1fr;
   }
 }

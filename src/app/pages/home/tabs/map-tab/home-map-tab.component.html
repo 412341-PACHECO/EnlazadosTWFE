@@ -1,36 +1,280 @@
-<section class="tab-panel">
-  <h2>Mapa de ubicaciones</h2>
+<section class="map-tab-shell">
+  <header class="map-hero">
+    <div>
+      <h2>Mapa de ubicaciones</h2>
+      <p>
+        Explorá profesionales e instituciones cercanas tocando el mapa para cambiar el punto de
+        consulta.
+      </p>
+    </div>
 
-  <article class="map-card">
-    <div class="map-orb map-orb--blue"></div>
-    <div class="map-orb map-orb--green"></div>
-    <div class="map-orb map-orb--amber"></div>
-    <div class="map-pin">
-      <ion-icon name="location-outline"></ion-icon>
+    <button type="button" class="query-pill">
+      <ion-icon name="locate-outline"></ion-icon>
+      <span>{{ queryLatitude | number: '1.4-4' }}, {{ queryLongitude | number: '1.4-4' }}</span>
+    </button>
+  </header>
+
+  <section class="map-filters">
+    <div class="search-panel">
+      <div class="search-panel__header">
+        <ion-icon name="search-outline"></ion-icon>
+        <span>Buscar profesional por rol, especialidad u obra social</span>
+      </div>
+
+      <div class="search-panel__filters">
+        <label class="filter-select">
+          <app-custom-select
+            [disabled]="!canViewProfessionals"
+            [ngModel]="selectedSpecialty"
+            (ngModelChange)="onSpecialtyChange($event)"
+            [options]="specialtyOptions"
+            theme="blue"
+          ></app-custom-select>
+        </label>
+
+        <label class="filter-select">
+          <app-custom-select
+            [disabled]="!canViewProfessionals"
+            [ngModel]="selectedHealthInsurance"
+            (ngModelChange)="onHealthInsuranceChange($event)"
+            [options]="healthInsuranceOptions"
+            theme="blue"
+          ></app-custom-select>
+        </label>
+      </div>
     </div>
-    <div class="map-copy">
-      <strong>Trelew, Chubut</strong>
-      <span>Mapa interactivo próximamente</span>
+
+    <div class="layer-chips">
+      <button
+        type="button"
+        class="layer-chip"
+        [class.layer-chip--active]="showProfessionals"
+        [disabled]="!canViewProfessionals"
+        (click)="onToggleLayer('professionals')"
+      >
+        Profesionales
+      </button>
+      <button
+        type="button"
+        class="layer-chip"
+        [class.layer-chip--active]="showSchools"
+        (click)="onToggleLayer('schools')"
+      >
+        Escuelas
+      </button>
+      <button
+        type="button"
+        class="layer-chip"
+        [class.layer-chip--active]="showOffices"
+        (click)="onToggleLayer('offices')"
+      >
+        Consultorios
+      </button>
     </div>
+  </section>
+
+  <article class="map-hint-card">
+    <div class="map-hint-card__icon">
+      <ion-icon name="checkmark-circle"></ion-icon>
+    </div>
+    <p>
+      Tocá el mapa para cambiar el punto de consulta. Los círculos coloreados solo aparecen cuando
+      el profesional tiene radio de cobertura configurado.
+    </p>
   </article>
 
-  <div class="section-headline">
-    <h3>Ubicaciones registradas</h3>
-  </div>
+  @if (actionFeedback) {
+    <article class="action-feedback" [class.action-feedback--error]="actionFeedbackTone === 'error'">
+      <div>
+        <strong>{{ actionFeedbackTone === 'success' ? 'Solicitud enviada' : 'Atención' }}</strong>
+        <span>{{ actionFeedback }}</span>
+      </div>
 
-  <div class="stack-list">
-    @for (location of locations; track location.name) {
-      <article class="list-card">
-        <div class="list-card__icon" [attr.data-accent]="location.accent">
-          <ion-icon name="location-outline"></ion-icon>
+      <button type="button" (click)="dismissActionFeedback()">
+        <ion-icon name="close-outline"></ion-icon>
+      </button>
+    </article>
+  }
+
+  <section class="map-frame">
+    @if (isLoading) {
+      <div class="map-state">
+        <ion-spinner name="crescent"></ion-spinner>
+        <span>Cargando ubicaciones cercanas...</span>
+      </div>
+    }
+
+    <div #mapContainer class="leaflet-map" [class.leaflet-map--loading]="isLoading"></div>
+  </section>
+
+  @if (loadError) {
+    <p class="feedback feedback--error">{{ loadError }}</p>
+  }
+
+  @if (!canViewProfessionals) {
+    <p class="feedback">
+      La capa de profesionales cercanos queda reservada para cuentas con rol PARENT. Las
+      instituciones siguen visibles para referencia territorial.
+    </p>
+  }
+
+  <footer class="map-legend">
+    @for (legendItem of legendItems; track legendItem.label) {
+      <div class="legend-pill">
+        <span class="legend-dot" [attr.data-tone]="legendItem.tone"></span>
+        <span>{{ legendItem.label }}</span>
+      </div>
+    }
+  </footer>
+
+  <section class="results-block">
+    <div class="results-heading">
+      <h3>{{ visibleProfessionalCount }} profesionales en tu área</h3>
+      <span>Radio de consulta {{ radiusKm }} km</span>
+    </div>
+
+    @if (hasVisibleProfessionals) {
+      <div class="professional-list">
+        @for (professional of professionals; track trackProfessional($index, professional)) {
+          <article class="professional-card">
+            <button type="button" class="professional-card__main" (click)="focusProfessional(professional)">
+              <div class="professional-card__avatar">
+                {{ professional.initials }}
+              </div>
+
+              <div class="professional-card__copy">
+                <strong>{{ professional.fullName }}</strong>
+                <span>{{ professional.specialty }}</span>
+              </div>
+
+              <div class="professional-card__meta">
+                <strong>{{ formatDistance(professional.distanceKm) }}</strong>
+                <span>{{ getProfessionalRadiusLabel(professional) }}</span>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              class="professional-card__cta"
+              (click)="openContactRequestModal(professional)"
+            >
+              <ion-icon name="chatbubble-ellipses-outline"></ion-icon>
+              <span>Solicitar servicios</span>
+            </button>
+          </article>
+        }
+      </div>
+    } @else {
+      <article class="empty-card">
+        <ion-icon name="business-outline"></ion-icon>
+        <div>
+          <strong>No hay profesionales para este filtro.</strong>
+          <span>Probá mover el punto de consulta o volver a “Todos”.</span>
         </div>
-        <div class="list-card__copy">
-          <strong>{{ location.name }}</strong>
-          <span>{{ location.address }}</span>
-          <small>{{ location.type }}</small>
-        </div>
-        <ion-icon name="chevron-forward-outline"></ion-icon>
       </article>
     }
-  </div>
+  </section>
 </section>
+
+@if (isContactModalOpen && selectedProfessionalForContact) {
+  <div class="contact-modal-backdrop" (click)="closeContactRequestModal()">
+    <section class="contact-modal" (click)="$event.stopPropagation()">
+      <header class="contact-modal__header">
+        <div>
+          <p>Solicitud de contacto</p>
+          <h3>{{ selectedProfessionalForContact.fullName }}</h3>
+          <span>{{ selectedProfessionalForContact.specialty }}</span>
+        </div>
+
+        <button type="button" class="contact-modal__close" (click)="closeContactRequestModal()">
+          <ion-icon name="close-outline"></ion-icon>
+        </button>
+      </header>
+
+      <div class="contact-modal__body">
+        <label class="field-block">
+          <span>Paciente asociado</span>
+          <app-custom-select
+            [ngModel]="selectedPatientId"
+            (ngModelChange)="selectedPatientId = $event ?? ''"
+            [options]="patientOptions"
+            [searchable]="parentPatients.length > 5"
+            searchPlaceholder="Buscar paciente"
+            [disabled]="isLoadingParentPatients || !parentPatients.length"
+            theme="blue"
+          ></app-custom-select>
+          @if (isLoadingParentPatients) {
+            <small>Cargando pacientes asociados...</small>
+          } @else if (!parentPatients.length) {
+            <small>Podés enviar una solicitud general sin vincular un paciente.</small>
+          }
+        </label>
+
+        <div class="contact-sharing">
+          <button
+            type="button"
+            class="contact-sharing__chip"
+            [class.contact-sharing__chip--active]="shareContactEmail"
+            (click)="shareContactEmail = !shareContactEmail"
+          >
+            <ion-icon name="mail-outline"></ion-icon>
+            <span>Compartir mi correo</span>
+          </button>
+
+          <button
+            type="button"
+            class="contact-sharing__chip"
+            [class.contact-sharing__chip--active]="shareContactPhone"
+            (click)="shareContactPhone = !shareContactPhone"
+          >
+            <ion-icon name="call-outline"></ion-icon>
+            <span>Compartir mi teléfono</span>
+          </button>
+        </div>
+
+        @if (shareContactPhone) {
+          <label class="field-block">
+            <span>Teléfono de contacto</span>
+            <input
+              type="tel"
+              [ngModel]="parentPhone"
+              (ngModelChange)="parentPhone = $event"
+              placeholder="Ej: +54 280 123 4567"
+            />
+          </label>
+        }
+
+        <label class="field-block">
+          <span>Mensaje para el profesional</span>
+          <textarea
+            [ngModel]="contactMessage"
+            (ngModelChange)="contactMessage = $event"
+            rows="5"
+            maxlength="2000"
+            placeholder="Contale brevemente qué tipo de acompañamiento necesitás."
+          ></textarea>
+        </label>
+
+        @if (contactRequestError) {
+          <p class="contact-modal__error">{{ contactRequestError }}</p>
+        }
+      </div>
+
+      <footer class="contact-modal__footer">
+        <button type="button" class="contact-modal__secondary" (click)="closeContactRequestModal()">
+          Cancelar
+        </button>
+
+        <button
+          type="button"
+          class="contact-modal__primary"
+          [disabled]="isSubmittingContactRequest"
+          (click)="submitContactRequest()"
+        >
+          <ion-icon name="paper-plane-outline"></ion-icon>
+          <span>{{ isSubmittingContactRequest ? 'Enviando...' : 'Enviar solicitud' }}</span>
+        </button>
+      </footer>
+    </section>
+  </div>
+}

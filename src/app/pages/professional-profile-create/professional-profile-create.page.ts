@@ -47,7 +47,10 @@ export class ProfessionalProfileCreatePage implements AfterViewInit, OnDestroy {
 
   private map?: L.Map;
   private marker?: L.Marker;
+  private coverageCircle?: L.Circle;
   private isUpdatingFromMap = false;
+  private readonly minCoverageRadiusKm = 0.5;
+  private readonly maxCoverageRadiusKm = 15;
 
   protected isSubmitting = false;
   protected submitError = '';
@@ -83,6 +86,7 @@ export class ProfessionalProfileCreatePage implements AfterViewInit, OnDestroy {
         Validators.min(0.01),
       ],
     ],
+    coverageRadiusKm: [''],
   });
 
   constructor() {
@@ -109,6 +113,14 @@ export class ProfessionalProfileCreatePage implements AfterViewInit, OnDestroy {
     this.professionalForm.controls.longitude.valueChanges
       .pipe(debounceTime(150), takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.syncMarkerFromForm());
+
+    this.professionalForm.controls.specialty.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((value) => this.handleSpecialtyChange(value));
+
+    this.professionalForm.controls.coverageRadiusKm.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.syncCoverageCircle());
   }
 
   ngAfterViewInit(): void {
@@ -153,6 +165,9 @@ export class ProfessionalProfileCreatePage implements AfterViewInit, OnDestroy {
               formValue.acceptedHealthInsurances,
             ),
             sessionFee: Number(formValue.sessionFee),
+            coverageRadiusKm: this.requiresCoverageRadius
+              ? Number(formValue.coverageRadiusKm)
+              : null,
           }),
         ),
         takeUntilDestroyed(this.destroyRef),
@@ -177,7 +192,8 @@ export class ProfessionalProfileCreatePage implements AfterViewInit, OnDestroy {
       | 'latitude'
       | 'longitude'
       | 'acceptedHealthInsurances'
-      | 'sessionFee',
+      | 'sessionFee'
+      | 'coverageRadiusKm',
   ): boolean {
     const control = this.professionalForm.get(controlName);
     return !!control && control.invalid && (control.dirty || control.touched);
@@ -190,7 +206,8 @@ export class ProfessionalProfileCreatePage implements AfterViewInit, OnDestroy {
       | 'latitude'
       | 'longitude'
       | 'acceptedHealthInsurances'
-      | 'sessionFee',
+      | 'sessionFee'
+      | 'coverageRadiusKm',
   ): string {
     const control = this.professionalForm.get(controlName);
 
@@ -225,6 +242,24 @@ export class ProfessionalProfileCreatePage implements AfterViewInit, OnDestroy {
     return 'Revisa este campo.';
   }
 
+  protected get requiresCoverageRadius(): boolean {
+    return this.isTherapeuticCompanionSpecialty(this.professionalForm.controls.specialty.value);
+  }
+
+  protected get coverageRadiusLabel(): string {
+    const rawValue = this.professionalForm.controls.coverageRadiusKm.value;
+    const radius = Number(rawValue);
+    return Number.isFinite(radius) ? `${radius.toFixed(1)} km` : `${this.minCoverageRadiusKm.toFixed(1)} km`;
+  }
+
+  protected get coverageMinLabel(): string {
+    return `${this.minCoverageRadiusKm.toFixed(1)} km`;
+  }
+
+  protected get coverageMaxLabel(): string {
+    return `${this.maxCoverageRadiusKm} km`;
+  }
+
   private initializeMap(): void {
     if (!this.mapContainer || this.map) {
       return;
@@ -240,7 +275,19 @@ export class ProfessionalProfileCreatePage implements AfterViewInit, OnDestroy {
       attribution: '&copy; OpenStreetMap contributors',
     }).addTo(this.map);
 
-    this.marker = L.marker(this.trelewCoordinates, { draggable: true }).addTo(this.map);
+    this.marker = L.marker(this.trelewCoordinates, {
+      draggable: true,
+      icon: this.createProfessionalMarkerIcon(),
+    }).addTo(this.map);
+
+    this.coverageCircle = L.circle(this.trelewCoordinates, {
+      radius: this.minCoverageRadiusKm * 1000,
+      color: '#47bfdc',
+      fillColor: '#72d8ee',
+      fillOpacity: 0.12,
+      weight: 2,
+      dashArray: '8 8',
+    });
 
     this.marker.on('dragend', () => {
       const markerPosition = this.marker?.getLatLng();
@@ -258,6 +305,7 @@ export class ProfessionalProfileCreatePage implements AfterViewInit, OnDestroy {
     });
 
     queueMicrotask(() => this.map?.invalidateSize());
+    this.handleSpecialtyChange(this.professionalForm.controls.specialty.value);
   }
 
   private syncMarkerFromForm(): void {
@@ -281,6 +329,7 @@ export class ProfessionalProfileCreatePage implements AfterViewInit, OnDestroy {
     }
 
     this.marker.setLatLng([latitude, longitude]);
+    this.coverageCircle?.setLatLng([latitude, longitude]);
     this.map.panTo([latitude, longitude], { animate: true });
   }
 
@@ -308,6 +357,87 @@ export class ProfessionalProfileCreatePage implements AfterViewInit, OnDestroy {
       .split(',')
       .map((insurance) => insurance.trim())
       .filter(Boolean);
+  }
+
+  private handleSpecialtyChange(value: string): void {
+    const coverageControl = this.professionalForm.controls.coverageRadiusKm;
+
+    if (this.isTherapeuticCompanionSpecialty(value)) {
+      coverageControl.setValidators([
+        Validators.required,
+        Validators.pattern(/^\d+(\.\d{1,1})?$/),
+        Validators.min(this.minCoverageRadiusKm),
+        Validators.max(this.maxCoverageRadiusKm),
+      ]);
+
+      if (!coverageControl.value.trim()) {
+        coverageControl.setValue(`${this.minCoverageRadiusKm.toFixed(1)}`, { emitEvent: false });
+      }
+    } else {
+      coverageControl.clearValidators();
+      coverageControl.setValue('', { emitEvent: false });
+      this.coverageCircle?.remove();
+    }
+
+    coverageControl.updateValueAndValidity({ emitEvent: false });
+    this.syncCoverageCircle();
+  }
+
+  private syncCoverageCircle(): void {
+    if (!this.map || !this.coverageCircle) {
+      return;
+    }
+
+    if (!this.requiresCoverageRadius) {
+      return;
+    }
+
+    const radiusKm = Number(this.professionalForm.controls.coverageRadiusKm.value);
+    const latitude = Number(this.professionalForm.controls.latitude.value);
+    const longitude = Number(this.professionalForm.controls.longitude.value);
+
+    if (!Number.isFinite(radiusKm) || !Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+      return;
+    }
+
+    this.coverageCircle.setLatLng([latitude, longitude]);
+    this.coverageCircle.setRadius(radiusKm * 1000);
+
+    if (!this.map.hasLayer(this.coverageCircle)) {
+      this.coverageCircle.addTo(this.map);
+    }
+  }
+
+  private isTherapeuticCompanionSpecialty(value: string): boolean {
+    const normalized = this.normalizeSpecialty(value);
+    return normalized === 'at' || normalized.includes('acompanante terapeutico');
+  }
+
+  private normalizeSpecialty(value: string): string {
+    return value
+      .toLowerCase()
+      .trim()
+      .replace(/[áàäâ]/g, 'a')
+      .replace(/[éèëê]/g, 'e')
+      .replace(/[íìïî]/g, 'i')
+      .replace(/[óòöô]/g, 'o')
+      .replace(/[úùüû]/g, 'u')
+      .replace(/ñ/g, 'n')
+      .replace(/\s+/g, ' ');
+  }
+
+  private createProfessionalMarkerIcon(): L.DivIcon {
+    return L.divIcon({
+      className: 'professional-marker-shell',
+      html: `
+        <span class="professional-marker">
+          <span class="professional-marker__head"></span>
+          <span class="professional-marker__body"></span>
+        </span>
+      `,
+      iconSize: [34, 34],
+      iconAnchor: [17, 34],
+    });
   }
 
   private extractErrorMessage(error: unknown): string {

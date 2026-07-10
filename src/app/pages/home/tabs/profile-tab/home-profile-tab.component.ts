@@ -4,6 +4,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { IonIcon } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { logOutOutline, star } from 'ionicons/icons';
+import { Observable } from 'rxjs';
 
 import { AuthResponse, ParentProfileResponse, ProfessionalProfileResponse } from '../../../../models';
 import { ProfessionalProfileService } from '../../../../services/professional-profile.service';
@@ -24,6 +25,7 @@ interface ProfileStat {
 export class HomeProfileTabComponent implements OnInit {
   @Input() session: AuthResponse | null = null;
   @Output() logoutRequested = new EventEmitter<void>();
+  @Output() displayNameResolved = new EventEmitter<string>();
 
   private readonly userService = inject(UserService);
   private readonly professionalProfileService = inject(ProfessionalProfileService);
@@ -248,19 +250,19 @@ export class HomeProfileTabComponent implements OnInit {
   }
 
   private loadParentProfile(): void {
-    if (!this.session?.email) {
+    if (!this.session?.email && !this.session?.userId && !this.session?.id) {
       return;
     }
 
     this.isLoadingParentProfile = true;
 
-    this.userService
-      .getParentProfileByEmail(this.session.email)
+    this.resolveParentProfileRequest()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (profile) => {
           this.parentProfile = profile;
           this.isLoadingParentProfile = false;
+          this.displayNameResolved.emit(`${profile.firstName} ${profile.lastName}`.trim());
         },
         error: () => {
           this.parentProfile = null;
@@ -270,25 +272,47 @@ export class HomeProfileTabComponent implements OnInit {
   }
 
   private loadProfessionalProfile(): void {
-    if (!this.session?.email) {
+    if (!this.session?.email && !this.session?.userId && !this.session?.id) {
       return;
     }
 
     this.isLoadingProfessionalProfile = true;
 
-    this.professionalProfileService
-      .getProfileByUserEmail(this.session.email)
+    this.resolveProfessionalProfileRequest()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (profile) => {
           this.professionalProfile = profile;
           this.isLoadingProfessionalProfile = false;
+          this.displayNameResolved.emit(
+            `${profile.user.firstName} ${profile.user.lastName}`.trim(),
+          );
         },
         error: () => {
           this.professionalProfile = null;
           this.isLoadingProfessionalProfile = false;
         },
       });
+  }
+
+  private resolveParentProfileRequest(): Observable<ParentProfileResponse> {
+    const sessionUserId = this.session?.userId ?? this.session?.id;
+
+    if (sessionUserId) {
+      return this.userService.getParentProfileById(sessionUserId);
+    }
+
+    return this.userService.getParentProfileByEmail(this.session!.email);
+  }
+
+  private resolveProfessionalProfileRequest(): Observable<ProfessionalProfileResponse> {
+    const sessionUserId = this.session?.userId ?? this.session?.id;
+
+    if (sessionUserId) {
+      return this.professionalProfileService.getProfileByUserId(sessionUserId);
+    }
+
+    return this.professionalProfileService.getProfileByUserEmail(this.session!.email);
   }
 
   private translateRole(role: string): string {

@@ -63,15 +63,16 @@
 
         <div class="field-group">
           <label for="roleId">Rol Profesional</label>
-          <div class="input-shell input-shell--select" [class.input-shell--error]="hasControlError('roleId')">
-            <ion-icon name="briefcase-outline"></ion-icon>
-            <select id="roleId" formControlName="roleId" [disabled]="isLoadingRoles">
-              <option value="">Selecciona tu rol</option>
-              @for (role of roles; track role.id) {
-                <option [value]="role.id">{{ role.name }}</option>
-              }
-            </select>
-            <ion-icon name="chevron-down-outline"></ion-icon>
+          <div class="select-field" [class.select-field--error]="hasControlError('roleId')">
+            <div class="select-field__icon">
+              <ion-icon name="briefcase-outline"></ion-icon>
+            </div>
+            <app-custom-select
+              formControlName="roleId"
+              [options]="roleOptions"
+              [disabled]="isLoadingRoles"
+              theme="blue"
+            ></app-custom-select>
           </div>
           <p class="field-hint">{{ rolesHelperText }}</p>
           @if (hasControlError('roleId')) {
@@ -138,12 +139,16 @@
           }
         </div>
 
-        <label class="terms-check">
+        <div class="terms-check">
           <input type="checkbox" formControlName="acceptTerms" />
           <span>
-            Acepto los terminos y condiciones de uso de la plataforma y las politicas de privacidad de datos
+            Acepto los
+            <button type="button" class="terms-link-button" (click)="openTermsModal()">
+              terminos y condiciones
+            </button>
+            de uso de la plataforma y las politicas de privacidad de datos.
           </span>
-        </label>
+        </div>
         @if (hasControlError('acceptTerms')) {
           <p class="field-error">{{ getControlErrorMessage('acceptTerms') }}</p>
         }
@@ -173,3 +178,52 @@
     </div>
   </section>
 </ion-content>
+
+@if (isTermsModalOpen) {
+  <div class="terms-overlay">
+    <div class="terms-modal">
+      <div class="terms-modal__header">
+        <div>
+          <h2>Terminos y condiciones</h2>
+          <p>EnlazadosTW · Jonas Pacheco</p>
+        </div>
+        <button type="button" class="terms-close-button" (click)="closeTermsModal()">
+          <ion-icon name="close-outline"></ion-icon>
+        </button>
+      </div>
+
+      <div
+        #termsScrollContainer
+        class="terms-modal__body"
+        (scroll)="onTermsScroll()"
+      >
+        @for (section of termsSections; track section.title) {
+          <section class="terms-section">
+            <h3>{{ section.title }}</h3>
+            @for (paragraph of section.paragraphs; track paragraph) {
+              <p>{{ paragraph }}</p>
+            }
+          </section>
+        }
+      </div>
+
+      <div class="terms-modal__footer">
+        <p class="terms-scroll-hint">
+          @if (hasReachedTermsBottom) {
+            Ya puedes aceptar los terminos.
+          } @else {
+            Desliza hasta el final para habilitar la aceptacion.
+          }
+        </p>
+        <button
+          type="button"
+          class="submit-button terms-accept-button"
+          [disabled]="!hasReachedTermsBottom"
+          (click)="acceptTermsFromModal()"
+        >
+          Aceptar terminos
+        </button>
+      </div>
+    </div>
+  </div>
+}

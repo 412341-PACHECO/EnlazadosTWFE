@@ -28,6 +28,10 @@ import {
   TherapeuticTeamResponse,
   UserResponse,
 } from '../../../../models';
+import {
+  CustomSelectComponent,
+  CustomSelectOption,
+} from '../../../../shared/components/custom-select/custom-select.component';
 import { DailyReportService } from '../../../../services/daily-report.service';
 import { PatientService } from '../../../../services/patient.service';
 import { ProfessionalProfileService } from '../../../../services/professional-profile.service';
@@ -58,7 +62,7 @@ interface LegajoSummary {
 @Component({
   selector: 'app-home-record-tab',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, IonIcon],
+  imports: [CommonModule, ReactiveFormsModule, IonIcon, CustomSelectComponent],
   templateUrl: './home-record-tab.component.html',
   styleUrl: './home-record-tab.component.scss',
 })
@@ -152,6 +156,16 @@ export class HomeRecordTabComponent implements OnInit {
     }
 
     return this.summaries;
+  }
+
+  protected get invitePatientOptions(): CustomSelectOption<string>[] {
+    return [
+      { label: 'Selecciona un paciente', value: '' },
+      ...this.summaries.map((summary) => ({
+        label: `${summary.patient.firstName} ${summary.patient.lastName}`.trim(),
+        value: summary.patient.id,
+      })),
+    ];
   }
 
   protected get isParentRole(): boolean {

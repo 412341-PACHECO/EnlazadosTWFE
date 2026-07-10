@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import {
   ProfessionalProfileCreateRequest,
+  ProfessionalProfileMapResponse,
   ProfessionalProfileResponse,
   ProfessionalProfileUpdateRequest,
 } from '../models';
@@ -51,6 +52,31 @@ export class ProfessionalProfileService {
   getProfileByLicenseNumber(licenseNumber: string): Observable<ProfessionalProfileResponse> {
     const params = new HttpParams().set('licenseNumber', licenseNumber);
     return this.http.get<ProfessionalProfileResponse>(`${this.profilesUrl}/search/by-license`, {
+      params,
+    });
+  }
+
+  getNearbyProfiles(
+    latitude: number,
+    longitude: number,
+    radiusKm: number,
+    specialty?: string | null,
+    acceptedHealthInsurance?: string | null,
+  ): Observable<ProfessionalProfileMapResponse[]> {
+    let params = new HttpParams()
+      .set('latitude', `${latitude}`)
+      .set('longitude', `${longitude}`)
+      .set('radiusKm', `${radiusKm}`);
+
+    if (specialty?.trim()) {
+      params = params.set('specialty', specialty.trim());
+    }
+
+    if (acceptedHealthInsurance?.trim()) {
+      params = params.set('acceptedHealthInsurance', acceptedHealthInsurance.trim());
+    }
+
+    return this.http.get<ProfessionalProfileMapResponse[]>(`${this.profilesUrl}/map/nearby`, {
       params,
     });
   }

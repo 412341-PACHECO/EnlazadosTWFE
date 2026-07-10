@@ -6,7 +6,9 @@ export interface UserCreateRequest {
   roleId: string;
 }
 
-export interface UserUpdateRequest extends Partial<UserCreateRequest> {}
+export interface UserUpdateRequest extends Partial<UserCreateRequest> {
+  fcmToken?: string | null;
+}
 
 export interface LoginRequest {
   email: string;

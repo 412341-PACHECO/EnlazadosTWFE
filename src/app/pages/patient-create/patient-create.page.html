@@ -85,22 +85,31 @@
         </div>
 
         <div class="field-group">
-          <label for="institutionId">Institucion vinculada</label>
-          <div class="input-shell" [class.input-shell--error]="hasControlError('institutionId')">
-            <ion-icon name="business-outline"></ion-icon>
-            <input
-              id="institutionId"
-              type="text"
+          <label for="institutionId">Escuela vinculada</label>
+          <div class="select-field" [class.select-field--error]="hasControlError('institutionId')">
+            <div class="select-field__icon">
+              <ion-icon name="business-outline"></ion-icon>
+            </div>
+            <app-custom-select
               formControlName="institutionId"
-              placeholder="Ingresa el UUID de la institucion"
-            />
+              [options]="institutionOptions"
+              theme="green"
+              [searchable]="true"
+              searchPlaceholder="Buscar escuela..."
+            ></app-custom-select>
           </div>
           @if (hasControlError('institutionId')) {
             <p class="field-error">{{ getControlErrorMessage('institutionId') }}</p>
           }
-          <p class="field-hint">
-            Por ahora este alta espera el `UUID` de la institucion hasta integrar su selector.
-          </p>
+          @if (isLoadingInstitutions) {
+            <p class="field-hint">Cargando escuelas disponibles...</p>
+          } @else if (institutionsLoadError) {
+            <p class="field-error">{{ institutionsLoadError }}</p>
+          } @else if (!institutions.length) {
+            <p class="field-hint">No hay escuelas cargadas para asociar por el momento.</p>
+          } @else {
+            <p class="field-hint">Selecciona la escuela asociada al paciente si corresponde.</p>
+          }
         </div>
 
         @if (submitError) {

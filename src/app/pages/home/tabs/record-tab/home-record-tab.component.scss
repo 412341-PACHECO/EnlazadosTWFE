@@ -563,17 +563,7 @@
 }
 
 .select-shell {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: center;
-}
-
-.select-shell select {
-  border: 0;
-  outline: 0;
-  background: transparent;
-  color: var(--dash-ink);
-  font: inherit;
+  display: block;
 }
 
 .select-shell--error,

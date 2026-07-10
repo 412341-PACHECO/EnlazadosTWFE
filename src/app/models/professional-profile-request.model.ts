@@ -6,6 +6,7 @@ export interface ProfessionalProfileCreateRequest {
   longitude: number;
   acceptedHealthInsurances: string[];
   sessionFee: number;
+  coverageRadiusKm?: number | null;
 }
 
 export interface ProfessionalProfileUpdateRequest

@@ -1,5 +1,6 @@
 export * from './auth-request.model';
 export * from './auth-response.model';
+export * from './contact-request.model';
 export * from './daily-report.model';
 export * from './institution-basic.model';
 export * from './institution.model';
@@ -11,8 +12,10 @@ export * from './patient-request.model';
 export * from './patient-response.model';
 export * from './parent-profile-response.model';
 export * from './professional-profile.model';
+export * from './professional-profile-map-response.model';
 export * from './professional-profile-request.model';
 export * from './professional-profile-response.model';
+export * from './institution-map-response.model';
 export * from './role-basic.model';
 export * from './role.model';
 export * from './role-request.model';

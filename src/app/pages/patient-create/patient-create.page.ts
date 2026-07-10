@@ -13,7 +13,13 @@ import {
   personOutline,
 } from 'ionicons/icons';
 
+import { InstitutionResponse } from '../../models';
+import {
+  CustomSelectComponent,
+  CustomSelectOption,
+} from '../../shared/components/custom-select/custom-select.component';
 import { AuthSessionService } from '../../services/auth-session.service';
+import { InstitutionService } from '../../services/institution.service';
 import { PatientService } from '../../services/patient.service';
 import { UserService } from '../../services/user.service';
 
@@ -22,12 +28,13 @@ import { UserService } from '../../services/user.service';
   templateUrl: './patient-create.page.html',
   styleUrls: ['./patient-create.page.scss'],
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, IonContent, IonIcon, IonSpinner],
+  imports: [CommonModule, ReactiveFormsModule, IonContent, IonIcon, IonSpinner, CustomSelectComponent],
 })
 export class PatientCreatePage implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly authSessionService = inject(AuthSessionService);
   private readonly userService = inject(UserService);
+  private readonly institutionService = inject(InstitutionService);
   private readonly patientService = inject(PatientService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
@@ -36,14 +43,17 @@ export class PatientCreatePage implements OnInit {
 
   protected isSubmitting = false;
   protected isLoadingParent = false;
+  protected isLoadingInstitutions = false;
   protected submitError = '';
   protected submitSuccess = '';
+  protected institutionsLoadError = '';
+  protected institutions: InstitutionResponse[] = [];
 
   protected readonly patientForm = this.formBuilder.nonNullable.group({
     firstName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
     lastName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
     diagnosis: ['', [Validators.maxLength(500)]],
-    institutionId: ['', [Validators.pattern(this.uuidPattern)]],
+    institutionId: [''],
     parentId: ['', [Validators.required, Validators.pattern(this.uuidPattern)]],
     parentDisplay: this.formBuilder.nonNullable.control({ value: '', disabled: true }),
   });
@@ -60,6 +70,19 @@ export class PatientCreatePage implements OnInit {
 
   ngOnInit(): void {
     this.loadParentContext();
+    this.loadInstitutions();
+  }
+
+  protected get institutionOptions(): CustomSelectOption<string>[] {
+    return [
+      { label: 'Sin escuela asociada', value: '' },
+      ...this.institutions
+        .filter((institution) => this.isSchoolInstitution(institution))
+        .map((institution) => ({
+          label: this.formatInstitutionOption(institution),
+          value: institution.id,
+        })),
+    ];
   }
 
   protected onSubmit(): void {
@@ -139,6 +162,11 @@ export class PatientCreatePage implements OnInit {
     return 'Revisa este campo.';
   }
 
+  protected formatInstitutionOption(institution: InstitutionResponse): string {
+    const normalizedType = institution.type.trim();
+    return normalizedType ? `${institution.name} - ${normalizedType}` : institution.name;
+  }
+
   private loadParentContext(): void {
     this.submitError = '';
 
@@ -180,6 +208,38 @@ export class PatientCreatePage implements OnInit {
       });
   }
 
+  private loadInstitutions(): void {
+    this.isLoadingInstitutions = true;
+    this.institutionsLoadError = '';
+
+    this.institutionService
+      .getAllInstitutions()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (institutions) => {
+          this.isLoadingInstitutions = false;
+          this.institutions = [...institutions].sort((left, right) =>
+            left.name.localeCompare(right.name, 'es', { sensitivity: 'base' }),
+          );
+        },
+        error: (error: unknown) => {
+          this.isLoadingInstitutions = false;
+          this.institutionsLoadError = this.extractInstitutionErrorMessage(error);
+        },
+      });
+  }
+
+  private isSchoolInstitution(institution: InstitutionResponse): boolean {
+    const normalizedType = institution.type.toLowerCase();
+    const normalizedName = institution.name.toLowerCase();
+
+    return [normalizedType, normalizedName].some((value) =>
+      ['escuela', 'colegio', 'jardin', 'jardín', 'instituto'].some((term) =>
+        value.includes(term),
+      ),
+    );
+  }
+
   private buildParentLabel(firstName?: string, lastName?: string, email?: string): string {
     const fullName = [firstName?.trim(), lastName?.trim()].filter(Boolean).join(' ');
 
@@ -212,6 +272,16 @@ export class PatientCreatePage implements OnInit {
     }
 
     return 'No se pudo crear el paciente. Revisa los datos e intenta nuevamente.';
+  }
+
+  private extractInstitutionErrorMessage(error: unknown): string {
+    const backendMessage = this.extractMessageFromError(error);
+
+    if (backendMessage) {
+      return backendMessage;
+    }
+
+    return 'No se pudieron cargar las escuelas disponibles.';
   }
 
   private extractMessageFromError(error: unknown): string | null {

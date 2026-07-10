@@ -9,9 +9,16 @@
           <span>EnlazadosTW</span>
         </div>
 
-        <button class="notification-button" type="button" aria-label="Notificaciones">
+        <button
+          class="notification-button"
+          type="button"
+          aria-label="Notificaciones"
+          (click)="toggleNotificationsPanel()"
+        >
           <ion-icon name="notifications-outline"></ion-icon>
-          <span>{{ notificationsCount }}</span>
+          @if (notificationsCount) {
+            <span>{{ notificationsCount }}</span>
+          }
         </button>
       </div>
 
@@ -30,11 +37,19 @@
 
     <main class="dashboard-main">
       @if (activeTab === 'profile') {
-        <app-home-profile-tab [session]="session" (logoutRequested)="logout()"></app-home-profile-tab>
+        <app-home-profile-tab
+          [session]="session"
+          (logoutRequested)="logout()"
+          (displayNameResolved)="onProfileDisplayNameResolved($event)"
+        ></app-home-profile-tab>
+      }
+
+      @if (activeTab === 'requests' && isProfessionalRole) {
+        <app-home-requests-tab [session]="session"></app-home-requests-tab>
       }
 
       @if (activeTab === 'map') {
-        <app-home-map-tab></app-home-map-tab>
+        <app-home-map-tab [session]="session"></app-home-map-tab>
       }
 
       @if (activeTab === 'record') {
@@ -47,7 +62,62 @@
     </main>
   </section>
 
-  <nav class="tabbar" aria-label="Navegación principal">
+  @if (isNotificationsPanelOpen) {
+    <div class="notifications-overlay" (click)="closeNotificationsPanel()">
+      <section class="notifications-panel" (click)="$event.stopPropagation()">
+        <header class="notifications-panel__header">
+          <div>
+            <h2>Notificaciones</h2>
+            <p>{{ notifications.length }} registradas</p>
+          </div>
+
+          <button type="button" class="notifications-close-button" (click)="closeNotificationsPanel()">
+            <ion-icon name="close-outline"></ion-icon>
+          </button>
+        </header>
+
+        @if (notifications.length) {
+          <div class="notifications-panel__actions">
+            <button type="button" class="notifications-text-button" (click)="markNotificationsAsRead()">
+              <ion-icon name="checkmark-done-outline"></ion-icon>
+              <span>Marcar todas como leídas</span>
+            </button>
+
+            <button type="button" class="notifications-text-button" (click)="clearNotifications()">
+              Limpiar
+            </button>
+          </div>
+
+          <div class="notifications-list">
+            @for (notification of notifications; track notification.id) {
+              <article
+                class="notification-card"
+                [class.notification-card--unread]="notification.unread"
+                (click)="openNotification(notification)"
+              >
+                <div class="notification-card__indicator"></div>
+
+                <div class="notification-card__copy">
+                  <div class="notification-card__topline">
+                    <strong>{{ notification.title }}</strong>
+                    <span>{{ getNotificationTimestamp(notification.receivedAt) }}</span>
+                  </div>
+                  <p>{{ notification.body }}</p>
+                </div>
+              </article>
+            }
+          </div>
+        } @else {
+          <div class="notifications-empty-state">
+            <strong>Sin notificaciones</strong>
+            <span>Cuando lleguen nuevas notificaciones aparecerán en esta sección.</span>
+          </div>
+        }
+      </section>
+    </div>
+  }
+
+  <nav class="tabbar" [class.tabbar--professional]="isProfessionalRole" aria-label="Navegación principal">
     <button
       type="button"
       class="tabbar__item"
@@ -57,6 +127,17 @@
       <ion-icon name="person-outline"></ion-icon>
       <span>Perfil</span>
     </button>
+    @if (isProfessionalRole) {
+      <button
+        type="button"
+        class="tabbar__item"
+        [class.tabbar__item--active]="activeTab === 'requests'"
+        (click)="setActiveTab('requests')"
+      >
+        <ion-icon name="notifications-outline"></ion-icon>
+        <span>Solicitudes</span>
+      </button>
+    }
     <button
       type="button"
       class="tabbar__item"

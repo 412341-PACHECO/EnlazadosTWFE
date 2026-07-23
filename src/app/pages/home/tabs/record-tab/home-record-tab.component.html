@@ -109,7 +109,7 @@
                     class="summary-preview__action"
                     (click)="$event.stopPropagation(); openSummary(summary)"
                   >
-                  {{ getSummaryFooterActionLabel(summary) }}
+                    {{ getSummaryFooterActionLabel(summary) }}
                   </button>
                 </div>
               </div>
@@ -159,6 +159,46 @@
           </div>
         }
       </article>
+    </div>
+
+    <div class="section-label">Resumenes semanales · {{ selectedPatientWeeklySummaries.length }}</div>
+
+    <div class="stack-list">
+      @if (!selectedPatientWeeklySummaries.length) {
+        <article class="empty-state empty-state--compact">
+          <strong>Sin resumenes semanales</strong>
+          <span>Cuando el sistema genere el proximo resumen del viernes aparecera en esta seccion.</span>
+        </article>
+      } @else {
+        @for (weeklySummary of selectedPatientWeeklySummaries; track weeklySummary.id) {
+          <article
+            class="weekly-summary-card"
+            [class.weekly-summary-card--active]="selectedWeeklySummary?.id === weeklySummary.id"
+            (click)="openWeeklySummary(weeklySummary)"
+          >
+            <div class="weekly-summary-card__header">
+              <div>
+                <strong>{{ getWeeklySummaryRangeLabel(weeklySummary) }}</strong>
+                <span>{{ getWeeklySummaryGeneratedLabel(weeklySummary) }}</span>
+              </div>
+              <small class="weekly-summary-card__badge">{{ getWeeklySummaryBadge(weeklySummary) }}</small>
+            </div>
+
+            <p>{{ getWeeklySummaryPreview(weeklySummary) }}</p>
+
+            <div class="weekly-summary-card__footer">
+              <span>{{ getWeeklySummaryModelLabel(weeklySummary) }}</span>
+              <button
+                type="button"
+                class="summary-preview__action"
+                (click)="$event.stopPropagation(); openWeeklySummary(weeklySummary)"
+              >
+                Ver resumen completo
+              </button>
+            </div>
+          </article>
+        }
+      }
     </div>
 
     <div class="section-label">Reportes de hoy · {{ selectedPatientReportsToday.length }}</div>
@@ -240,6 +280,32 @@
     </div>
   }
 </section>
+
+@if (selectedWeeklySummary) {
+  <div class="overlay" (click)="closeWeeklySummary()">
+    <div class="modal-card modal-card--weekly-summary" (click)="$event.stopPropagation()">
+      <div class="modal-handle"></div>
+      <div class="modal-head">
+        <div>
+          <h3>Resumen semanal</h3>
+          <p>{{ getWeeklySummaryRangeLabel(selectedWeeklySummary) }} · {{ getWeeklySummaryBadge(selectedWeeklySummary) }}</p>
+        </div>
+        <button type="button" class="icon-plain-button" (click)="closeWeeklySummary()">
+          <ion-icon name="close-outline"></ion-icon>
+        </button>
+      </div>
+
+      <div class="weekly-summary-detail">
+        <div class="weekly-summary-detail__meta">
+          <span>{{ getWeeklySummaryGeneratedLabel(selectedWeeklySummary) }}</span>
+          <strong>{{ getWeeklySummaryModelLabel(selectedWeeklySummary) }}</strong>
+        </div>
+
+        <div class="weekly-summary-detail__content">{{ selectedWeeklySummary.summaryContent }}</div>
+      </div>
+    </div>
+  </div>
+}
 
 @if (isCreatingInvitation) {
   <div class="overlay">

@@ -632,7 +632,7 @@ export class HomeMapTabComponent implements AfterViewInit, OnDestroy {
           <small>${this.escapeHtml(professional.user.email)}</small>
         </div>
         <div class="map-popup__row">
-          <label>Honorarios</label>
+          <label>Honorarios ARS</label>
           <small>${this.escapeHtml(this.formatCurrency(professional.sessionFee))}</small>
         </div>
         <div class="map-popup__row">

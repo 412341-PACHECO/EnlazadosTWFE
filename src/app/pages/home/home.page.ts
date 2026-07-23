@@ -11,6 +11,7 @@ import {
   documentTextOutline,
   folderOpenOutline,
   heart,
+  helpCircleOutline,
   locationOutline,
   notificationsOutline,
   personOutline,
@@ -27,8 +28,10 @@ import { HomeMapTabComponent } from './tabs/map-tab/home-map-tab.component';
 import { HomeProfileTabComponent } from './tabs/profile-tab/home-profile-tab.component';
 import { HomeRequestsTabComponent } from './tabs/requests-tab/home-requests-tab.component';
 import { HomeRecordTabComponent } from './tabs/record-tab/home-record-tab.component';
+import { FaqModalComponent } from '../../shared/components/faq-modal/faq-modal.component';
 
 type HomeTab = 'profile' | 'map' | 'record' | 'docs' | 'requests';
+type HomeFaqRole = 'PARENT' | 'PROFESSIONAL' | null;
 
 @Component({
   selector: 'app-home',
@@ -44,6 +47,7 @@ type HomeTab = 'profile' | 'map' | 'record' | 'docs' | 'requests';
     HomeMapTabComponent,
     HomeRecordTabComponent,
     HomeDocsTabComponent,
+    FaqModalComponent,
   ],
 })
 export class HomePage implements OnInit {
@@ -66,6 +70,9 @@ export class HomePage implements OnInit {
   protected activeTab: HomeTab = 'profile';
   protected profileDisplayNameOverride: string | null = null;
   protected isNotificationsPanelOpen = false;
+  protected isFaqOpen = false;
+  protected focusedRecordPatientId: string | null = null;
+  protected focusedWeeklySummaryId: string | null = null;
 
   constructor() {
     addIcons({
@@ -75,6 +82,7 @@ export class HomePage implements OnInit {
       documentTextOutline,
       folderOpenOutline,
       heart,
+      helpCircleOutline,
       locationOutline,
       notificationsOutline,
       personOutline,
@@ -95,6 +103,8 @@ export class HomePage implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((params) => {
         const requestedTab = params.get('tab');
+        this.focusedRecordPatientId = params.get('patientId');
+        this.focusedWeeklySummaryId = params.get('weeklySummaryId');
 
         if (requestedTab === 'record') {
           this.activeTab = 'record';
@@ -111,7 +121,7 @@ export class HomePage implements OnInit {
           return;
         }
 
-        if (requestedTab === 'requests' && this.isProfessionalRole) {
+        if (requestedTab === 'requests' && this.hasRequestsTab) {
           this.activeTab = 'requests';
           return;
         }
@@ -147,12 +157,32 @@ export class HomePage implements OnInit {
     return this.session?.role === 'PROFESSIONAL';
   }
 
+  protected get isParentRole(): boolean {
+    return this.session?.role === 'PARENT';
+  }
+
+  protected get hasRequestsTab(): boolean {
+    return this.isProfessionalRole || this.isParentRole;
+  }
+
+  protected get faqRole(): HomeFaqRole {
+    if (this.session?.role === 'PARENT' || this.session?.role === 'PROFESSIONAL') {
+      return this.session.role;
+    }
+
+    return null;
+  }
+
   protected setActiveTab(tab: HomeTab): void {
     if (tab === 'record' && this.activeTab === 'record') {
+      this.focusedRecordPatientId = null;
+      this.focusedWeeklySummaryId = null;
       this.recordTabComponent?.resetToOverview();
       return;
     }
 
+    this.focusedRecordPatientId = null;
+    this.focusedWeeklySummaryId = null;
     this.activeTab = tab;
   }
 
@@ -161,11 +191,21 @@ export class HomePage implements OnInit {
   }
 
   protected toggleNotificationsPanel(): void {
+    this.isFaqOpen = false;
     this.isNotificationsPanelOpen = !this.isNotificationsPanelOpen;
   }
 
   protected closeNotificationsPanel(): void {
     this.isNotificationsPanelOpen = false;
+  }
+
+  protected openFaq(): void {
+    this.isNotificationsPanelOpen = false;
+    this.isFaqOpen = true;
+  }
+
+  protected closeFaq(): void {
+    this.isFaqOpen = false;
   }
 
   protected markNotificationsAsRead(): void {
@@ -199,5 +239,6 @@ export class HomePage implements OnInit {
   @HostListener('document:keydown.escape')
   protected onEscapePressed(): void {
     this.closeNotificationsPanel();
+    this.closeFaq();
   }
 }

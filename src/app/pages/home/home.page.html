@@ -9,17 +9,23 @@
           <span>EnlazadosTW</span>
         </div>
 
-        <button
-          class="notification-button"
-          type="button"
-          aria-label="Notificaciones"
-          (click)="toggleNotificationsPanel()"
-        >
-          <ion-icon name="notifications-outline"></ion-icon>
-          @if (notificationsCount) {
-            <span>{{ notificationsCount }}</span>
-          }
-        </button>
+        <div class="header-actions">
+          <button class="help-button" type="button" aria-label="Ayuda" (click)="openFaq()">
+            <ion-icon name="help-circle-outline"></ion-icon>
+          </button>
+
+          <button
+            class="notification-button"
+            type="button"
+            aria-label="Notificaciones"
+            (click)="toggleNotificationsPanel()"
+          >
+            <ion-icon name="notifications-outline"></ion-icon>
+            @if (notificationsCount) {
+              <span>{{ notificationsCount }}</span>
+            }
+          </button>
+        </div>
       </div>
 
       <div class="welcome-card">
@@ -44,7 +50,7 @@
         ></app-home-profile-tab>
       }
 
-      @if (activeTab === 'requests' && isProfessionalRole) {
+      @if (activeTab === 'requests' && hasRequestsTab) {
         <app-home-requests-tab [session]="session"></app-home-requests-tab>
       }
 
@@ -53,11 +59,15 @@
       }
 
       @if (activeTab === 'record') {
-        <app-home-record-tab [session]="session"></app-home-record-tab>
+        <app-home-record-tab
+          [session]="session"
+          [focusPatientId]="focusedRecordPatientId"
+          [focusWeeklySummaryId]="focusedWeeklySummaryId"
+        ></app-home-record-tab>
       }
 
       @if (activeTab === 'docs') {
-        <app-home-docs-tab></app-home-docs-tab>
+        <app-home-docs-tab [session]="session"></app-home-docs-tab>
       }
     </main>
   </section>
@@ -117,7 +127,15 @@
     </div>
   }
 
-  <nav class="tabbar" [class.tabbar--professional]="isProfessionalRole" aria-label="Navegación principal">
+  @if (isFaqOpen) {
+    <app-faq-modal
+      [activeTab]="activeTab"
+      [role]="faqRole"
+      (closeRequested)="closeFaq()"
+    ></app-faq-modal>
+  }
+
+  <nav class="tabbar" [class.tabbar--professional]="hasRequestsTab" aria-label="Navegación principal">
     <button
       type="button"
       class="tabbar__item"
@@ -127,7 +145,7 @@
       <ion-icon name="person-outline"></ion-icon>
       <span>Perfil</span>
     </button>
-    @if (isProfessionalRole) {
+    @if (hasRequestsTab) {
       <button
         type="button"
         class="tabbar__item"
@@ -163,7 +181,7 @@
       (click)="setActiveTab('docs')"
     >
       <ion-icon name="document-text-outline"></ion-icon>
-      <span>Docs PDF</span>
+      <span>Facturación</span>
     </button>
   </nav>
 </ion-content>

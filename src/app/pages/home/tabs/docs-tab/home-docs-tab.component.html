@@ -1,30 +1,565 @@
-<section class="tab-panel">
-  <h2>Documentos PDF</h2>
-
-  <article class="upload-card">
-    <div class="upload-card__icon">
-      <ion-icon name="cloud-upload-outline"></ion-icon>
+<section class="docs-shell">
+  <header class="docs-hero">
+    <div>
+      <h2>Facturación</h2>
+      <p>Registrá asistencias, consolidá liquidaciones y controlá tus cobros desde un solo lugar.</p>
     </div>
-    <strong>Subir documento PDF</strong>
-    <span>Informes, planes, evaluaciones...</span>
-  </article>
 
-  <div class="section-headline">
-    <h3>Documentos recientes</h3>
-  </div>
-
-  <div class="stack-list">
-    @for (document of items; track document.title) {
-      <article class="list-card">
-        <div class="list-card__icon" [attr.data-accent]="document.accent">
-          <ion-icon name="document-text-outline"></ion-icon>
-        </div>
-        <div class="list-card__copy">
-          <strong>{{ document.title }}</strong>
-          <span>{{ document.meta }}</span>
-        </div>
-        <small class="document-tag" [attr.data-accent]="document.accent">{{ document.type }}</small>
-      </article>
+    @if (isProfessionalRole) {
+      <button type="button" class="primary-cta" (click)="openRecordModal()" [disabled]="!canCreateRecords">
+        <ion-icon name="document-attach-outline"></ion-icon>
+        <span>Registrar asistencia</span>
+      </button>
     }
-  </div>
+  </header>
+
+  @if (!isProfessionalRole) {
+    <article class="empty-state">
+      <strong>Sección disponible para profesionales</strong>
+      <span>La gestión de asistencias y liquidaciones administrativas se habilita desde perfiles profesionales.</span>
+    </article>
+  } @else {
+    <section class="panel-card summary-panel">
+      <div class="panel-headline panel-headline--summary">
+        <div>
+          <h3>Dashboard de cobros</h3>
+          <p>Resumen semestral para seguir lo liquidado, cobrado y pendiente sin calcular manualmente.</p>
+        </div>
+
+        <div class="summary-panel__select">
+          <app-custom-select
+            [ngModel]="selectedSummarySemester"
+            (ngModelChange)="onSummarySemesterChange($event)"
+            [options]="semesterOptions"
+            theme="blue"
+          ></app-custom-select>
+        </div>
+      </div>
+
+      <div class="summary-date-grid">
+        <label class="field-block">
+          <span>Desde</span>
+          <input
+            class="field-block__control field-block__control--date"
+            type="date"
+            [value]="summaryDateFrom"
+            (input)="onSummaryDateChange('from', $event)"
+            (click)="openNativeDatePicker($event)"
+            (focus)="openNativeDatePicker($event)"
+          />
+        </label>
+
+        <label class="field-block">
+          <span>Hasta</span>
+          <input
+            class="field-block__control field-block__control--date"
+            type="date"
+            [value]="summaryDateTo"
+            (input)="onSummaryDateChange('to', $event)"
+            (click)="openNativeDatePicker($event)"
+            (focus)="openNativeDatePicker($event)"
+          />
+        </label>
+      </div>
+
+      @if (summaryFilterError) {
+        <p class="summary-filter-feedback summary-filter-feedback--error">{{ summaryFilterError }}</p>
+      } @else if (isLoadingSummaryFilter) {
+        <p class="summary-filter-feedback">Aplicando filtro por rango de fechas...</p>
+      }
+
+      <div class="summary-period">
+        <strong>{{ summaryPeriodLabel }}</strong>
+        <span>{{ summaryBillingCount }} liquidaciones generadas · {{ summaryBilledSessions }} sesiones facturadas</span>
+      </div>
+
+      <div class="summary-grid">
+        <article class="summary-card summary-card--strong">
+          <span>Total liquidado</span>
+          <strong>{{ summaryInvoicedAmount }}</strong>
+          <small>Consolidado del semestre</small>
+        </article>
+
+        <article class="summary-card">
+          <span>Total cobrado</span>
+          <strong>{{ summaryCollectedAmount }}</strong>
+          <small>{{ summaryPaidProgress }}% del total ya pagado</small>
+        </article>
+
+        <article class="summary-card">
+          <span>Pendiente de cobro</span>
+          <strong>{{ summaryPendingAmount }}</strong>
+          <small>Liquidaciones aún no pagadas</small>
+        </article>
+
+        <article class="summary-card">
+          <span>Sesiones facturadas</span>
+          <strong>{{ summaryBilledSessions }}</strong>
+          <small>Incluidas en liquidaciones</small>
+        </article>
+
+        <article class="summary-card">
+          <span>Sesiones pendientes</span>
+          <strong>{{ summaryPendingSessions }}</strong>
+          <small>Asistencias sin consolidar</small>
+        </article>
+      </div>
+
+      <div class="summary-progress">
+        <div class="summary-progress__label">
+          <span>Avance de cobro del semestre</span>
+          <strong>{{ summaryPaidProgress }}%</strong>
+        </div>
+
+        <div class="summary-progress__track">
+          <span [style.width.%]="summaryPaidProgress"></span>
+        </div>
+      </div>
+    </section>
+
+
+    <div class="section-switcher">
+      <button type="button" [class.section-switcher__item--active]="activeSection === 'records'" (click)="setSection('records')">
+        Asistencias
+      </button>
+      <button type="button" [class.section-switcher__item--active]="activeSection === 'billings'" (click)="setSection('billings')">
+        Liquidaciones
+      </button>
+    </div>
+
+    @if (loadError) {
+      <article class="empty-state empty-state--error">
+        <strong>No se pudo cargar la sección</strong>
+        <span>{{ loadError }}</span>
+      </article>
+    } @else if (isLoading) {
+      <article class="empty-state">
+        <strong>Cargando información...</strong>
+        <span>Estamos preparando las asistencias y liquidaciones del profesional.</span>
+      </article>
+    } @else {
+      @if (actionSuccess) {
+        <article class="feedback feedback--success">
+          <ion-icon name="checkmark-circle-outline"></ion-icon>
+          <span>{{ actionSuccess }}</span>
+        </article>
+      }
+
+      @if (actionError) {
+        <article class="feedback feedback--error">
+          <ion-icon name="close-outline"></ion-icon>
+          <span>{{ actionError }}</span>
+        </article>
+      }
+
+      @if (activeSection === 'records') {
+        <section class="panel-card filters-card">
+          <div class="panel-headline">
+            <div>
+              <h3>Sesiones cargadas</h3>
+              <p>Revisá las asistencias del mes y su estado administrativo.</p>
+            </div>
+          </div>
+
+          <div class="filters-grid">
+            <label class="field-block">
+              <span>Mes</span>
+              <input
+                class="field-block__control"
+                type="month"
+                [value]="selectedMonthFilter"
+                (input)="selectedMonthFilter = $any($event.target).value"
+              />
+            </label>
+
+            <label class="field-block">
+              <span>Paciente</span>
+              <div class="field-block__control field-block__control--select">
+                <app-custom-select
+                  [ngModel]="selectedPatientFilter"
+                  (ngModelChange)="selectedPatientFilter = $event ?? ''"
+                  [options]="patientOptions"
+                  [searchable]="availablePatients.length > 5"
+                  searchPlaceholder="Buscar paciente"
+                  theme="blue"
+                ></app-custom-select>
+              </div>
+            </label>
+
+            <label class="field-block">
+              <span>Estado</span>
+              <div class="field-block__control field-block__control--select">
+                <app-custom-select
+                  [ngModel]="selectedStatusFilter"
+                  (ngModelChange)="selectedStatusFilter = $event ?? ''"
+                  [options]="statusOptions"
+                  theme="blue"
+                ></app-custom-select>
+              </div>
+            </label>
+          </div>
+        </section>
+
+        @if (visibleRecords.length) {
+          <div class="stack-list">
+            @for (record of visibleRecords; track record.id) {
+              <article class="record-card">
+                <div class="record-card__header">
+                  <div>
+                    <strong>{{ record.patient.firstName }} {{ record.patient.lastName }}</strong>
+                    <span>{{ record.patient.diagnosis }} · {{ formatDate(record.sessionDate) }}</span>
+                  </div>
+
+                  <span class="status-pill" [attr.data-status]="record.status">
+                    {{ getRecordStatusLabel(record.status) }}
+                  </span>
+                </div>
+
+                <div class="record-card__meta">
+                  <div class="record-card__meta-item">
+                    <span>Obra social:</span>
+                    <strong>{{ record.healthInsuranceName }}</strong>
+                  </div>
+
+                  <div class="record-card__meta-item">
+                    <span>Honorario:</span>
+                    <strong>{{ formatCurrency(record.sessionFeeSnapshot) }}</strong>
+                  </div>
+
+                  <div class="record-card__meta-item">
+                    <span>Cobertura:</span>
+                    <strong>{{ formatCurrency(record.healthInsuranceCoverageAmount) }}</strong>
+                  </div>
+
+                  <div class="record-card__meta-item">
+                    <span>Copago:</span>
+                    <strong>{{ formatCurrency(record.copaymentAmount) }}</strong>
+                  </div>
+                </div>
+
+                @if (record.notes) {
+                  <p class="record-card__notes">{{ record.notes }}</p>
+                }
+
+                @if (record.status === 'PENDING') {
+                  <div class="record-card__actions">
+                    <button type="button" class="secondary-ghost" (click)="deleteRecord(record)">
+                      Eliminar
+                    </button>
+                  </div>
+                }
+              </article>
+            }
+          </div>
+        } @else {
+          <article class="empty-state">
+            <strong>Sin asistencias para este filtro</strong>
+            <span>Registrá una nueva sesión o cambiá el mes, paciente o estado seleccionado.</span>
+          </article>
+        }
+      }
+
+      @if (activeSection === 'billings') {
+        <section class="panel-card filters-card">
+          <div class="panel-headline">
+            <div>
+              <h3>Generar liquidación</h3>
+              <p>Consolidá las asistencias pendientes por período y filtros opcionales.</p>
+            </div>
+
+            <button type="button" class="primary-cta primary-cta--small" (click)="generateBilling()" [disabled]="isGeneratingBilling">
+              <ion-icon name="cash-outline"></ion-icon>
+              <span>{{ isGeneratingBilling ? 'Generando...' : 'Generar liquidación' }}</span>
+            </button>
+          </div>
+
+          <div class="filters-grid">
+            <label class="field-block">
+              <span>Período</span>
+              <input
+                class="field-block__control"
+                type="month"
+                [value]="billingForm.getRawValue().billingPeriod"
+                (input)="billingForm.patchValue({ billingPeriod: $any($event.target).value })"
+              />
+            </label>
+
+            <label class="field-block">
+              <span>Paciente</span>
+              <div class="field-block__control field-block__control--select">
+                <app-custom-select
+                  [ngModel]="billingForm.getRawValue().patientId"
+                  (ngModelChange)="billingForm.patchValue({ patientId: $event ?? '' })"
+                  [options]="patientOptions"
+                  [searchable]="availablePatients.length > 5"
+                  searchPlaceholder="Buscar paciente"
+                  theme="blue"
+                ></app-custom-select>
+              </div>
+            </label>
+
+            <label class="field-block">
+              <span>Obra social</span>
+              <input
+                class="field-block__control"
+                type="text"
+                [value]="billingForm.getRawValue().healthInsuranceName"
+                (input)="billingForm.patchValue({ healthInsuranceName: $any($event.target).value })"
+                placeholder="Filtrar por obra social"
+              />
+            </label>
+          </div>
+        </section>
+
+        <div class="billings-layout">
+          <div class="stack-list">
+            @if (visibleBillings.length) {
+              @for (billing of visibleBillings; track billing.id) {
+                <article class="billing-card" (click)="openBillingDetail(billing)">
+                  <div class="billing-card__header">
+                    <div>
+                      <strong>{{ billing.billingPeriod }}</strong>
+                      <span>{{ billing.patient ? billing.patient.firstName + ' ' + billing.patient.lastName : 'Liquidación consolidada' }}</span>
+                    </div>
+
+                    <span class="status-pill" [attr.data-status]="billing.paymentStatus">
+                      {{ getBillingStatusLabel(billing.paymentStatus) }}
+                    </span>
+                  </div>
+
+                  <div class="billing-card__meta">
+                    <div class="billing-card__meta-item">
+                      <span>Obra social:</span>
+                      <strong>{{ billing.healthInsuranceName || 'Sin filtro' }}</strong>
+                    </div>
+
+                    <div class="billing-card__meta-item">
+                      <span>Sesiones:</span>
+                      <strong>{{ billing.totalSessions }}</strong>
+                    </div>
+
+                    <div class="billing-card__meta-item">
+                      <span>Total:</span>
+                      <strong>{{ formatCurrency(billing.totalAmount) }}</strong>
+                    </div>
+                  </div>
+                </article>
+              }
+            } @else {
+              <article class="empty-state">
+                <strong>Sin liquidaciones para este período</strong>
+                <span>Generá la primera liquidación para empezar a descargar los PDF administrativos.</span>
+              </article>
+            }
+          </div>
+
+          @if (selectedBilling) {
+            <aside class="billing-detail">
+              <div class="panel-headline">
+                <div>
+                  <h3>Detalle de liquidación</h3>
+                  <p>Resumen listo para descarga y presentación.</p>
+                </div>
+
+                <button type="button" class="secondary-icon" (click)="closeBillingDetail()">
+                  <ion-icon name="close-outline"></ion-icon>
+                </button>
+              </div>
+
+              <div class="billing-detail__summary">
+                <div>
+                  <label>Período:</label>
+                  <strong>{{ selectedBilling.billingPeriod }}</strong>
+                </div>
+                <div>
+                  <label>Estado:</label>
+                  <strong>{{ getBillingStatusLabel(selectedBilling.paymentStatus) }}</strong>
+                </div>
+                <div>
+                  <label>Total sesiones:</label>
+                  <strong>{{ selectedBilling.totalSessions }}</strong>
+                </div>
+                <div>
+                  <label>Monto total:</label>
+                  <strong>{{ formatCurrency(selectedBilling.totalAmount) }}</strong>
+                </div>
+                <div>
+                  <label>Paciente:</label>
+                  <strong>{{ selectedBilling.patient ? selectedBilling.patient.firstName + ' ' + selectedBilling.patient.lastName : 'Todos los pacientes' }}</strong>
+                </div>
+                <div>
+                  <label>Obra social:</label>
+                  <strong>{{ selectedBilling.healthInsuranceName || 'Sin filtro' }}</strong>
+                </div>
+              </div>
+
+              <div class="hash-card">
+                <label>Certificación digital SHA-256</label>
+                <strong>{{ getDigitalHashPreview(selectedBilling.digitalHash) }}</strong>
+                <span>Generada {{ formatDateTime(selectedBilling.createdAt) }}</span>
+              </div>
+
+              <div class="detail-actions">
+                @if (selectedBilling.paymentStatus !== 'LIQUIDATED') {
+                  <button
+                    type="button"
+                    class="primary-cta primary-cta--small"
+                    (click)="markBillingAsPaid(selectedBilling)"
+                    [disabled]="updatingBillingStatusId === selectedBilling.id"
+                  >
+                    <ion-icon name="checkmark-circle-outline"></ion-icon>
+                    <span>{{ updatingBillingStatusId === selectedBilling.id ? 'Actualizando...' : 'Marcar como pagada' }}</span>
+                  </button>
+                }
+
+                <button
+                  type="button"
+                  class="primary-cta primary-cta--small"
+                  (click)="downloadBillingPdf(selectedBilling)"
+                  [disabled]="downloadingBillingId === selectedBilling.id"
+                >
+                  <ion-icon name="download-outline"></ion-icon>
+                  <span>{{ downloadingBillingId === selectedBilling.id ? 'Descargando...' : 'Descargar PDF' }}</span>
+                </button>
+
+                <button
+                  type="button"
+                  class="secondary-ghost"
+                  (click)="shareBillingPdf(selectedBilling)"
+                  [disabled]="sharingBillingId === selectedBilling.id"
+                >
+                  <ion-icon name="share-social-outline"></ion-icon>
+                  <span>{{ sharingBillingId === selectedBilling.id ? 'Preparando...' : 'Compartir PDF' }}</span>
+                </button>
+              </div>
+            </aside>
+          }
+        </div>
+      }
+    }
+  }
 </section>
+
+@if (isCreatingRecord) {
+  <div class="modal-backdrop" (click)="closeRecordModal()">
+    <section class="modal-shell modal-shell--record" (click)="$event.stopPropagation()">
+      <header class="modal-shell__header">
+        <div>
+          <p>Asistencia</p>
+          <h3>Registrar sesión</h3>
+        </div>
+
+        <button type="button" class="secondary-icon" (click)="closeRecordModal()">
+          <ion-icon name="close-outline"></ion-icon>
+        </button>
+      </header>
+
+      <div class="modal-shell__body">
+        <label class="field-block">
+          <span>Paciente</span>
+          <div class="field-block__control field-block__control--select">
+            <app-custom-select
+              [ngModel]="recordForm.getRawValue().patientId"
+              (ngModelChange)="recordForm.patchValue({ patientId: $event ?? '' })"
+              [options]="recordPatientOptions"
+              [searchable]="availablePatients.length > 5"
+              searchPlaceholder="Buscar paciente"
+              theme="blue"
+            ></app-custom-select>
+          </div>
+        </label>
+
+        <div class="modal-grid">
+          <label class="field-block">
+            <span>Fecha</span>
+            <input
+              class="field-block__control field-block__control--record"
+              type="date"
+              [value]="recordForm.getRawValue().sessionDate"
+              (input)="recordForm.patchValue({ sessionDate: $any($event.target).value })"
+            />
+          </label>
+
+          <label class="field-block">
+            <span>Honorarios ARS</span>
+            <div class="currency-field">
+              <span>$</span>
+              <input
+                class="field-block__control field-block__control--record"
+                type="text"
+                inputmode="numeric"
+                [value]="recordForm.getRawValue().sessionFeeSnapshot"
+                (input)="onMoneyInput('sessionFeeSnapshot', $event)"
+                placeholder="0.00"
+              />
+            </div>
+          </label>
+        </div>
+
+        <label class="field-block">
+          <span>Obra social</span>
+          <input
+            class="field-block__control field-block__control--record"
+            type="text"
+            [value]="recordForm.getRawValue().healthInsuranceName"
+            (input)="recordForm.patchValue({ healthInsuranceName: $any($event.target).value })"
+            placeholder="Ej: OSDE"
+          />
+        </label>
+
+        <div class="modal-grid">
+          <label class="field-block">
+            <span>Cobertura</span>
+            <input
+              class="field-block__control field-block__control--record"
+              type="text"
+              inputmode="numeric"
+              [value]="recordForm.getRawValue().healthInsuranceCoverageAmount"
+              (input)="onMoneyInput('healthInsuranceCoverageAmount', $event)"
+              placeholder="0.00"
+            />
+          </label>
+
+          <label class="field-block">
+            <span>Copago</span>
+            <div class="currency-field">
+              <span>$</span>
+              <input
+                class="field-block__control field-block__control--record"
+                type="text"
+                inputmode="numeric"
+                [value]="recordForm.getRawValue().copaymentAmount"
+                (input)="onMoneyInput('copaymentAmount', $event)"
+                placeholder="0.00"
+              />
+            </div>
+          </label>
+        </div>
+
+        @if (hasRecordControlError('sessionFeeSnapshot')) {
+          <p class="field-error">{{ getRecordControlErrorMessage('sessionFeeSnapshot') }}</p>
+        }
+
+        <label class="field-block">
+          <span>Notas</span>
+          <textarea
+            class="field-block__control field-block__control--record field-block__control--textarea"
+            [value]="recordForm.getRawValue().notes"
+            (input)="recordForm.patchValue({ notes: $any($event.target).value })"
+            rows="4"
+            placeholder="Observaciones administrativas u operativas"
+          ></textarea>
+        </label>
+      </div>
+
+      <footer class="modal-shell__footer">
+        <button type="button" class="secondary-ghost" (click)="closeRecordModal()">Cancelar</button>
+        <button type="button" class="primary-cta primary-cta--small" (click)="submitRecord()" [disabled]="isSubmittingRecord">
+          <ion-icon name="document-attach-outline"></ion-icon>
+          <span>{{ isSubmittingRecord ? 'Guardando...' : 'Guardar asistencia' }}</span>
+        </button>
+      </footer>
+    </section>
+  </div>
+}
+

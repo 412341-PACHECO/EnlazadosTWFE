@@ -2,14 +2,26 @@
   <div class="section-headline">
     <div>
       <h2>Solicitudes</h2>
-      <p>Contactos recibidos desde el mapa profesional.</p>
+      <p>
+        {{
+          isProfessionalRole
+            ? 'Contactos recibidos desde el mapa profesional.'
+            : 'Seguimiento de solicitudes enviadas a profesionales.'
+        }}
+      </p>
     </div>
   </div>
 
   @if (isLoading) {
     <article class="empty-state">
       <strong>Cargando solicitudes...</strong>
-      <span>Estamos recuperando los contactos recientes enviados por las familias.</span>
+      <span>
+        {{
+          isProfessionalRole
+            ? 'Estamos recuperando los contactos recientes enviados por las familias.'
+            : 'Estamos recuperando las solicitudes que enviaste desde el mapa.'
+        }}
+      </span>
     </article>
   }
 
@@ -20,9 +32,9 @@
     </article>
   }
 
-  @if (!isLoading && !loadError && requests.length) {
+  @if (!isLoading && !loadError && isProfessionalRole && professionalRequests.length) {
     <div class="stack-list">
-      @for (request of requests; track trackRequest($index, request)) {
+      @for (request of professionalRequests; track trackProfessionalRequest($index, request)) {
         <article class="request-card" [class.request-card--viewed]="request.status === 'VIEWED'">
           <div class="request-card__header">
             <div class="request-avatar">
@@ -68,10 +80,65 @@
         </article>
       }
     </div>
+  } @else if (!isLoading && !loadError && isParentRole && parentRequests.length) {
+    <div class="stack-list">
+      @for (request of parentRequests; track trackParentRequest($index, request)) {
+        <article class="request-card" [class.request-card--viewed]="request.status === 'VIEWED'">
+          <div class="request-card__header">
+            <div class="request-avatar request-avatar--family">
+              <ion-icon name="medical-outline"></ion-icon>
+            </div>
+
+            <div class="request-copy">
+              <strong>{{ getProfessionalFullName(request) }}</strong>
+              <span>{{ request.professional.specialty }}</span>
+            </div>
+
+            <div class="request-meta">
+              <small>{{ getRequestTimestamp(request.createdAt) }}</small>
+              <span class="request-badge" [class.request-badge--viewed]="request.status === 'VIEWED'">
+                <ion-icon [name]="request.status === 'VIEWED' ? 'checkmark-circle-outline' : 'time-outline'"></ion-icon>
+                <span>{{ getStatusLabel(request.status) }}</span>
+              </span>
+            </div>
+          </div>
+
+          <div class="request-summary">
+            <div class="request-summary__row">
+              <span>Paciente</span>
+              <strong>{{ request.patientFullName || 'Sin paciente asociado' }}</strong>
+            </div>
+
+            <div class="request-summary__row">
+              <span>Honorarios ARS</span>
+              <strong>{{ getSessionFeeLabel(request.professional.sessionFee) }}</strong>
+            </div>
+
+            <div class="request-summary__row request-summary__row--wide">
+              <span>Obras sociales</span>
+              <strong>{{ getHealthInsurancesLabel(request) }}</strong>
+            </div>
+          </div>
+
+          <p>
+            {{
+              request.message ||
+                'Solicitud enviada para coordinar contacto profesional.'
+            }}
+          </p>
+        </article>
+      }
+    </div>
   } @else if (!isLoading && !loadError) {
     <article class="empty-state">
       <strong>Sin solicitudes todavía</strong>
-      <span>Cuando una familia solicite contacto desde el mapa aparecerá en esta sección.</span>
+      <span>
+        {{
+          isProfessionalRole
+            ? 'Cuando una familia solicite contacto desde el mapa aparecerá en esta sección.'
+            : 'Cuando envíes solicitudes desde el mapa podrás seguir su estado desde acá.'
+        }}
+      </span>
     </article>
   }
 </section>

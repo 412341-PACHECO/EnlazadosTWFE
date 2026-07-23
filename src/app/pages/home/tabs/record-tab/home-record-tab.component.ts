@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, Input, OnInit, inject } from '@angular/core';
+import { Component, DestroyRef, Input, OnChanges, OnInit, SimpleChanges, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { IonIcon } from '@ionic/angular/standalone';
@@ -27,6 +27,7 @@ import {
   TherapeuticTeamInvitationResponse,
   TherapeuticTeamResponse,
   UserResponse,
+  WeeklySummaryResponse,
 } from '../../../../models';
 import {
   CustomSelectComponent,
@@ -38,6 +39,7 @@ import { ProfessionalProfileService } from '../../../../services/professional-pr
 import { TherapeuticTeamInvitationService } from '../../../../services/therapeutic-team-invitation.service';
 import { TherapeuticTeamService } from '../../../../services/therapeutic-team.service';
 import { UserService } from '../../../../services/user.service';
+import { WeeklySummaryService } from '../../../../services/weekly-summary.service';
 
 interface HomeStatsItem {
   label: string;
@@ -49,6 +51,7 @@ interface LegajoSummary {
   patient: PatientResponse;
   teams: TherapeuticTeamResponse[];
   reports: DailyReportResponse[];
+  weeklySummaries: WeeklySummaryResponse[];
   invitations: TherapeuticTeamInvitationResponse[];
   activeTeamMembers: ProfessionalProfileResponse[];
   todayReports: DailyReportResponse[];
@@ -66,14 +69,17 @@ interface LegajoSummary {
   templateUrl: './home-record-tab.component.html',
   styleUrl: './home-record-tab.component.scss',
 })
-export class HomeRecordTabComponent implements OnInit {
+export class HomeRecordTabComponent implements OnInit, OnChanges {
   @Input({ required: true }) session: AuthResponse | null = null;
+  @Input() focusPatientId: string | null = null;
+  @Input() focusWeeklySummaryId: string | null = null;
 
   private readonly patientService = inject(PatientService);
   private readonly professionalProfileService = inject(ProfessionalProfileService);
   private readonly therapeuticTeamService = inject(TherapeuticTeamService);
   private readonly invitationService = inject(TherapeuticTeamInvitationService);
   private readonly dailyReportService = inject(DailyReportService);
+  private readonly weeklySummaryService = inject(WeeklySummaryService);
   private readonly userService = inject(UserService);
   private readonly formBuilder = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
@@ -94,6 +100,7 @@ export class HomeRecordTabComponent implements OnInit {
   protected reportSuccess = '';
   protected isSubmittingReport = false;
   protected selectedPriority: DailyReportPriority = 'LOW';
+  protected selectedWeeklySummary: WeeklySummaryResponse | null = null;
 
   protected readonly inviteForm = this.formBuilder.nonNullable.group({
     patientId: ['', [Validators.required]],
@@ -122,6 +129,15 @@ export class HomeRecordTabComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadLegajoData();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (
+      (changes['focusPatientId'] || changes['focusWeeklySummaryId']) &&
+      (this.focusPatientId || this.focusWeeklySummaryId)
+    ) {
+      this.loadLegajoData(this.focusPatientId ?? undefined, this.focusWeeklySummaryId ?? undefined);
+    }
   }
 
   protected setFilter(filter: string): void {
@@ -200,6 +216,10 @@ export class HomeRecordTabComponent implements OnInit {
 
   protected get selectedPatientPreviousReports(): DailyReportResponse[] {
     return this.selectedSummary?.previousReports ?? [];
+  }
+
+  protected get selectedPatientWeeklySummaries(): WeeklySummaryResponse[] {
+    return this.selectedSummary?.weeklySummaries ?? [];
   }
 
   protected get selectedPatientName(): string {
@@ -344,13 +364,46 @@ export class HomeRecordTabComponent implements OnInit {
 
   protected closeSummary(): void {
     this.selectedSummary = null;
+    this.selectedWeeklySummary = null;
   }
 
   public resetToOverview(): void {
     this.selectedSummary = null;
+    this.selectedWeeklySummary = null;
     this.expandedSummaryId = null;
     this.reportError = '';
     this.reportSuccess = '';
+  }
+
+  protected openWeeklySummary(summary: WeeklySummaryResponse): void {
+    this.selectedWeeklySummary = summary;
+  }
+
+  protected closeWeeklySummary(): void {
+    this.selectedWeeklySummary = null;
+  }
+
+  protected getWeeklySummaryRangeLabel(summary: WeeklySummaryResponse): string {
+    const start = this.formatDate(summary.weekStart);
+    const end = this.formatDate(summary.weekEnd);
+    return `${start} al ${end}`;
+  }
+
+  protected getWeeklySummaryPreview(summary: WeeklySummaryResponse): string {
+    const content = summary.summaryContent.trim();
+    return content.length > 180 ? `${content.slice(0, 180).trim()}...` : content;
+  }
+
+  protected getWeeklySummaryGeneratedLabel(summary: WeeklySummaryResponse): string {
+    return `Generado ${this.getReportTimestamp(summary.generatedAt)}`;
+  }
+
+  protected getWeeklySummaryBadge(summary: WeeklySummaryResponse): string {
+    return `${summary.reportsCount} reportes`;
+  }
+
+  protected getWeeklySummaryModelLabel(summary: WeeklySummaryResponse): string {
+    return summary.modelName?.trim() || 'Modelo IA';
   }
 
   protected openInvitationModal(): void {
@@ -532,7 +585,7 @@ export class HomeRecordTabComponent implements OnInit {
     return 'Revisa este campo.';
   }
 
-  private loadLegajoData(selectedPatientId?: string): void {
+  private loadLegajoData(selectedPatientId?: string, selectedWeeklySummaryId?: string): void {
     if (!this.session?.role) {
       this.isLoading = false;
       this.loadError = 'No se pudo identificar la sesion actual.';
@@ -562,28 +615,17 @@ export class HomeRecordTabComponent implements OnInit {
 
           if (!summaries.length) {
             this.selectedSummary = null;
+            this.selectedWeeklySummary = null;
             this.expandedSummaryId = null;
             return;
           }
 
-          if (selectedPatientId) {
-            this.selectedSummary =
-              summaries.find((summary) => summary.patient.id === selectedPatientId) ?? summaries[0];
-            return;
-          }
-
-          if (this.selectedSummary) {
-            this.selectedSummary =
-              summaries.find((summary) => summary.patient.id === this.selectedSummary?.patient.id) ??
-              summaries[0];
-            return;
-          }
-
-          this.selectedSummary = null;
+          this.applyCurrentSelection(summaries, selectedPatientId, selectedWeeklySummaryId);
         },
         error: () => {
           this.summaries = [];
           this.selectedSummary = null;
+          this.selectedWeeklySummary = null;
           this.loadError = 'No se pudo cargar el legajo interdisciplinario.';
         },
       });
@@ -622,12 +664,15 @@ export class HomeRecordTabComponent implements OnInit {
               reports: this.dailyReportService
                 .getDailyReportsByPatientId(patient.id)
                 .pipe(catchError(() => of([]))),
+              weeklySummaries: this.weeklySummaryService
+                .getWeeklySummariesByPatientId(patient.id)
+                .pipe(catchError(() => of([]))),
               invitations: this.invitationService
                 .getInvitationsByPatient(patient.id)
                 .pipe(catchError(() => of([]))),
             }).pipe(
-              map(({ teams, reports, invitations }) =>
-                this.buildSummary(patient, teams, reports, invitations),
+              map(({ teams, reports, weeklySummaries, invitations }) =>
+                this.buildSummary(patient, teams, reports, weeklySummaries, invitations),
               ),
             ),
           ),
@@ -658,9 +703,12 @@ export class HomeRecordTabComponent implements OnInit {
                   reports: this.dailyReportService
                     .getDailyReportsByPatientId(patient.id)
                     .pipe(catchError(() => of([]))),
+                  weeklySummaries: this.weeklySummaryService
+                    .getWeeklySummariesByPatientId(patient.id)
+                    .pipe(catchError(() => of([]))),
                 }).pipe(
-                  map(({ teams: patientTeams, reports }) =>
-                    this.buildSummary(patient, patientTeams, reports, []),
+                  map(({ teams: patientTeams, reports, weeklySummaries }) =>
+                    this.buildSummary(patient, patientTeams, reports, weeklySummaries, []),
                   ),
                 ),
               ),
@@ -675,6 +723,7 @@ export class HomeRecordTabComponent implements OnInit {
     patient: PatientResponse,
     teams: TherapeuticTeamResponse[],
     reports: DailyReportResponse[],
+    weeklySummaries: WeeklySummaryResponse[],
     invitations: TherapeuticTeamInvitationResponse[],
   ): LegajoSummary {
     const activeTeams = teams.filter((team) => this.isTeamActive(team));
@@ -694,6 +743,9 @@ export class HomeRecordTabComponent implements OnInit {
       teams,
       reports: [...reports].sort(
         (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      ),
+      weeklySummaries: [...weeklySummaries].sort(
+        (a, b) => new Date(b.generatedAt).getTime() - new Date(a.generatedAt).getTime(),
       ),
       invitations,
       activeTeamMembers,
@@ -741,6 +793,43 @@ export class HomeRecordTabComponent implements OnInit {
     const mm = String(today.getMonth() + 1).padStart(2, '0');
     const dd = String(today.getDate()).padStart(2, '0');
     return `${yyyy}-${mm}-${dd}`;
+  }
+
+  private applyCurrentSelection(
+    summaries: LegajoSummary[],
+    selectedPatientId?: string,
+    selectedWeeklySummaryId?: string,
+  ): void {
+    const preferredPatientId =
+      selectedPatientId ??
+      this.focusPatientId ??
+      this.selectedSummary?.patient.id ??
+      null;
+
+    this.selectedSummary = preferredPatientId
+      ? summaries.find((summary) => summary.patient.id === preferredPatientId) ?? summaries[0]
+      : null;
+
+    const preferredWeeklySummaryId = selectedWeeklySummaryId ?? this.focusWeeklySummaryId;
+
+    if (!preferredWeeklySummaryId) {
+      this.selectedWeeklySummary = this.selectedSummary?.weeklySummaries.find(
+        (summary) => summary.id === this.selectedWeeklySummary?.id,
+      ) ?? null;
+      return;
+    }
+
+    this.selectedWeeklySummary =
+      this.selectedSummary?.weeklySummaries.find((summary) => summary.id === preferredWeeklySummaryId) ??
+      null;
+  }
+
+  private formatDate(value: string): string {
+    const date = new Date(value);
+    return new Intl.DateTimeFormat('es-AR', {
+      day: '2-digit',
+      month: 'short',
+    }).format(date);
   }
 
   private getSentimentScoreByPriority(priority: DailyReportPriority): number {

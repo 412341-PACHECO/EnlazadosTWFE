@@ -308,6 +308,21 @@ export class PushNotificationsService {
       return;
     }
 
+    if (this.isWeeklySummaryNotification(notification)) {
+      void this.router.navigate(['/home'], {
+        queryParams: {
+          tab: 'record',
+          patientId: notification.data['patientId'] ?? null,
+          weeklySummaryId:
+            notification.data['weeklySummaryId'] ??
+            notification.data['summaryId'] ??
+            notification.data['id'] ??
+            null,
+        },
+      });
+      return;
+    }
+
     if (!this.isHighPriorityReportNotification(notification)) {
       return;
     }
@@ -348,6 +363,21 @@ export class PushNotificationsService {
       type.includes('solicitud_contacto') ||
       type.includes('solicitud-contacto') ||
       type.includes('contacto')
+    );
+  }
+
+  private isWeeklySummaryNotification(notification: InAppNotificationItem): boolean {
+    const type = (notification.data['type'] ?? notification.data['category'] ?? '').toLowerCase();
+    const title = notification.title.toLowerCase();
+    const body = notification.body.toLowerCase();
+
+    return (
+      type.includes('weekly_summary') ||
+      type.includes('weekly-summary') ||
+      type.includes('resumen_semanal') ||
+      type.includes('resumen-semanal') ||
+      title.includes('resumen semanal') ||
+      body.includes('resumen semanal')
     );
   }
 }

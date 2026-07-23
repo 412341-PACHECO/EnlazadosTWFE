@@ -3,7 +3,12 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../environments/environment';
-import { ContactRequestCreateRequest, ContactRequestResponse } from '../models';
+import {
+  ContactRequestCreateRequest,
+  ContactRequestResponse,
+  MessageResponse,
+  ParentContactRequestResponse,
+} from '../models';
 
 @Injectable({
   providedIn: 'root',
@@ -23,6 +28,28 @@ export class ContactRequestService {
     return this.http.get<ContactRequestResponse[]>(
       `${this.contactRequestsUrl}/search/by-professional`,
       { params },
+    );
+  }
+
+  getContactRequestsByParent(parentId: string): Observable<ParentContactRequestResponse[]> {
+    const params = new HttpParams().set('parentId', parentId);
+    return this.http.get<ParentContactRequestResponse[]>(
+      `${this.contactRequestsUrl}/search/by-parent`,
+      { params },
+    );
+  }
+
+  markContactRequestAsViewed(requestId: string): Observable<ContactRequestResponse> {
+    return this.http.put<ContactRequestResponse>(
+      `${this.contactRequestsUrl}/${requestId}/viewed`,
+      {},
+    );
+  }
+
+  markAllContactRequestsAsViewed(professionalId: string): Observable<MessageResponse> {
+    return this.http.put<MessageResponse>(
+      `${this.contactRequestsUrl}/search/by-professional/${professionalId}/viewed`,
+      {},
     );
   }
 }

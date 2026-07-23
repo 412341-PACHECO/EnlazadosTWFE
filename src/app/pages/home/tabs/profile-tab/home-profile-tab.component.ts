@@ -78,8 +78,10 @@ export class HomeProfileTabComponent implements OnInit {
           value: this.professionalProfile ? 'Completo' : this.isLoadingProfessionalProfile ? 'Cargando' : 'Pendiente',
         },
         {
-          label: 'Honorario',
-          value: this.professionalProfile?.sessionFee ? `$${this.professionalProfile.sessionFee}` : '-',
+          label: 'Honorarios ARS',
+          value: this.professionalProfile?.sessionFee
+            ? this.formatCurrency(this.professionalProfile.sessionFee)
+            : '-',
         },
       ];
     }
@@ -219,7 +221,7 @@ export class HomeProfileTabComponent implements OnInit {
 
   protected get quaternaryDetailLabel(): string {
     if (this.isProfessionalRole) {
-      return 'Honorario';
+      return 'Honorarios ARS';
     }
 
     return 'Apellido';
@@ -227,7 +229,9 @@ export class HomeProfileTabComponent implements OnInit {
 
   protected get quaternaryDetailValue(): string {
     if (this.isProfessionalRole) {
-      return this.professionalProfile?.sessionFee ? `$${this.professionalProfile.sessionFee}` : '-';
+      return this.professionalProfile?.sessionFee
+        ? this.formatCurrency(this.professionalProfile.sessionFee)
+        : '-';
     }
 
     return this.lastNameLabel;
@@ -327,5 +331,13 @@ export class HomeProfileTabComponent implements OnInit {
     }
 
     return role;
+  }
+
+  private formatCurrency(value: number): string {
+    return new Intl.NumberFormat('es-AR', {
+      style: 'currency',
+      currency: 'ARS',
+      maximumFractionDigits: 0,
+    }).format(value);
   }
 }

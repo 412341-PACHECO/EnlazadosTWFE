@@ -148,14 +148,16 @@
         </div>
 
         <div class="field-group">
-          <label for="sessionFee">Honorario por sesion</label>
+          <label for="sessionFee">Honorarios en pesos argentinos (ARS)</label>
           <div class="input-shell" [class.input-shell--error]="hasControlError('sessionFee')">
             <ion-icon name="cash-outline"></ion-icon>
             <input
               id="sessionFee"
               type="text"
+              inputmode="numeric"
               formControlName="sessionFee"
-              placeholder="25000"
+              placeholder="$ 25.000"
+              (input)="onSessionFeeInput($event)"
             />
           </div>
           @if (hasControlError('sessionFee')) {

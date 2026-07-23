@@ -1,0 +1,39 @@
+<div class="faq-overlay" (click)="close()">
+  <section class="faq-modal" (click)="$event.stopPropagation()">
+    <header class="faq-modal__header">
+      <div class="faq-modal__title">
+        <div class="faq-modal__icon">
+          <ion-icon name="help-circle-outline"></ion-icon>
+        </div>
+        <div>
+          <h2>{{ title }}</h2>
+          <p>{{ description }}</p>
+        </div>
+      </div>
+
+      <button type="button" class="faq-close-button" (click)="close()">
+        <ion-icon name="close-outline"></ion-icon>
+      </button>
+    </header>
+
+    <div class="faq-list">
+      @for (item of items; track item.id) {
+        <article class="faq-item" [class.faq-item--expanded]="isItemExpanded(item.id)">
+          <button type="button" class="faq-item__trigger" (click)="toggleItem(item.id)">
+            <span>{{ item.question }}</span>
+            <ion-icon
+              name="chevron-down-outline"
+              [class.faq-item__chevron--expanded]="isItemExpanded(item.id)"
+            ></ion-icon>
+          </button>
+
+          @if (isItemExpanded(item.id)) {
+            <div class="faq-item__content">
+              <p>{{ item.answer }}</p>
+            </div>
+          }
+        </article>
+      }
+    </div>
+  </section>
+</div>

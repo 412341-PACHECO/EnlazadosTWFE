@@ -1,5 +1,6 @@
 export * from './auth-request.model';
 export * from './auth-response.model';
+export * from './attendance.model';
 export * from './contact-request.model';
 export * from './daily-report.model';
 export * from './institution-basic.model';
@@ -26,3 +27,4 @@ export * from './user-basic.model';
 export * from './user.model';
 export * from './user-request.model';
 export * from './user-response.model';
+export * from './weekly-summary.model';

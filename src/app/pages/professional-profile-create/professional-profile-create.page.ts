@@ -26,6 +26,7 @@ import * as L from 'leaflet';
 import { AuthSessionService } from '../../services/auth-session.service';
 import { ProfessionalProfileService } from '../../services/professional-profile.service';
 import { UserService } from '../../services/user.service';
+import { formatArsIntegerInput, parseArsIntegerInput } from '../../shared/utils/currency-input.util';
 
 @Component({
   selector: 'app-professional-profile-create',
@@ -78,14 +79,7 @@ export class ProfessionalProfileCreatePage implements AfterViewInit, OnDestroy {
       ],
     ],
     acceptedHealthInsurances: ['', [Validators.maxLength(300)]],
-    sessionFee: [
-      '',
-      [
-        Validators.required,
-        Validators.pattern(/^\d+(\.\d{1,2})?$/),
-        Validators.min(0.01),
-      ],
-    ],
+    sessionFee: ['', [Validators.required]],
     coverageRadiusKm: [''],
   });
 
@@ -149,6 +143,14 @@ export class ProfessionalProfileCreatePage implements AfterViewInit, OnDestroy {
     }
 
     const formValue = this.professionalForm.getRawValue();
+    const parsedSessionFee = parseArsIntegerInput(formValue.sessionFee);
+
+    if (parsedSessionFee <= 0) {
+      this.professionalForm.controls.sessionFee.setErrors({ invalidAmount: true });
+      this.professionalForm.controls.sessionFee.markAsTouched();
+      return;
+    }
+
     this.isSubmitting = true;
 
     this.userService
@@ -164,7 +166,7 @@ export class ProfessionalProfileCreatePage implements AfterViewInit, OnDestroy {
             acceptedHealthInsurances: this.parseHealthInsurances(
               formValue.acceptedHealthInsurances,
             ),
-            sessionFee: Number(formValue.sessionFee),
+            sessionFee: parsedSessionFee,
             coverageRadiusKm: this.requiresCoverageRadius
               ? Number(formValue.coverageRadiusKm)
               : null,
@@ -199,6 +201,17 @@ export class ProfessionalProfileCreatePage implements AfterViewInit, OnDestroy {
     return !!control && control.invalid && (control.dirty || control.touched);
   }
 
+  protected onSessionFeeInput(event: Event): void {
+    const input = event.target as HTMLInputElement | null;
+
+    if (!input) {
+      return;
+    }
+
+    const formattedValue = formatArsIntegerInput(input.value);
+    this.professionalForm.controls.sessionFee.setValue(formattedValue);
+  }
+
   protected getControlErrorMessage(
     controlName:
       | 'specialty'
@@ -221,6 +234,10 @@ export class ProfessionalProfileCreatePage implements AfterViewInit, OnDestroy {
 
     if (control.errors['pattern']) {
       return 'Ingresa un valor numerico valido.';
+    }
+
+    if (control.errors['invalidAmount']) {
+      return 'Ingresa un monto mayor a 0.';
     }
 
     if (control.errors['minlength']) {

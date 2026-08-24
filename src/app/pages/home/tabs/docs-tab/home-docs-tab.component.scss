@@ -138,11 +138,6 @@
   place-items: center;
 }
 
-.stats-grid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-}
-
 .summary-grid {
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 12px;
@@ -154,7 +149,6 @@
   gap: 14px;
 }
 
-.stat-card,
 .panel-card,
 .record-card,
 .billing-card,
@@ -166,27 +160,6 @@
   background: #fff;
   border: 1px solid var(--docs-border);
   box-shadow: var(--docs-shadow);
-}
-
-.stat-card {
-  padding: 18px 16px;
-  border-radius: 20px;
-  display: grid;
-  gap: 8px;
-}
-
-.stat-card ion-icon {
-  font-size: 1.2rem;
-  color: var(--docs-primary);
-}
-
-.stat-card strong {
-  color: var(--docs-ink);
-  font-size: 1.35rem;
-}
-
-.stat-card span {
-  color: var(--docs-muted);
 }
 
 .summary-panel {
@@ -632,163 +605,6 @@
   font-size: 0.84rem;
 }
 
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 1300;
-  display: grid;
-  place-items: center;
-  padding: 18px;
-  background: rgba(8, 24, 44, 0.44);
-  backdrop-filter: blur(6px);
-}
-
-.modal-shell {
-  width: min(100%, 680px);
-  border-radius: 28px;
-  padding: 22px;
-  gap: 18px;
-}
-
-.modal-shell--record {
-  width: min(100%, 392px);
-  border-radius: 24px;
-  padding: 22px 22px 20px;
-  gap: 20px;
-  background: #fff;
-  border-top: 4px solid #12b8d4;
-}
-
-.modal-shell__header p {
-  color: var(--docs-primary);
-  font-size: 0.82rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.modal-shell__footer {
-  grid-template-columns: 1fr auto;
-  gap: 10px;
-}
-
-.modal-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-}
-
-.modal-shell--record .modal-shell__header {
-  align-items: center;
-}
-
-.modal-shell--record .modal-shell__header h3 {
-  font-size: 1.05rem;
-  font-weight: 700;
-}
-
-.modal-shell--record .modal-shell__header p {
-  font-size: 0.78rem;
-  letter-spacing: 0.08em;
-}
-
-.modal-shell--record .secondary-icon {
-  width: 34px;
-  height: 34px;
-  background: #f4f6fa;
-  color: #92a0b3;
-}
-
-.modal-shell--record .modal-shell__body {
-  gap: 14px;
-}
-
-.modal-shell--record .field-block {
-  gap: 6px;
-}
-
-.modal-shell--record .field-block > span {
-  font-size: 0.72rem;
-  letter-spacing: 0.08em;
-  color: #6e7f96;
-}
-
-.modal-shell--record .field-block__control--select app-custom-select {
-  display: block;
-}
-
-.modal-shell--record ::ng-deep .custom-select__trigger,
-.modal-shell--record .field-block__control--record,
-.modal-shell--record .field-block__control--textarea {
-  min-height: 42px;
-  border-radius: 14px;
-  border: 1px solid #d9e2ee;
-  background: #fff;
-  box-shadow: none;
-}
-
-.modal-shell--record ::ng-deep .custom-select__trigger {
-  min-height: 44px;
-}
-
-.modal-shell--record ::ng-deep .custom-select--open .custom-select__trigger {
-  box-shadow: 0 0 0 4px rgba(17, 149, 183, 0.08);
-}
-
-.modal-shell--record .field-block__control--record {
-  min-height: 42px;
-  padding: 0 14px;
-  font-size: 0.95rem;
-}
-
-.modal-shell--record .field-block__control--textarea {
-  min-height: 108px;
-  padding: 14px;
-}
-
-.modal-shell--record .modal-grid {
-  gap: 12px;
-}
-
-.modal-shell--record .modal-shell__footer {
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-.modal-shell--record .secondary-ghost,
-.modal-shell--record .primary-cta {
-  min-height: 44px;
-  border-radius: 14px;
-}
-
-.modal-shell--record .secondary-ghost {
-  border-color: #d9e2ee;
-  color: var(--docs-ink);
-}
-
-.modal-shell--record .primary-cta {
-  box-shadow: 0 10px 18px rgba(17, 149, 183, 0.22);
-}
-
-.currency-field {
-  position: relative;
-}
-
-.currency-field span {
-  position: absolute;
-  left: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #7d8ca1;
-  font-size: 0.95rem;
-  font-weight: 700;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.currency-field .field-block__control--record {
-  padding-left: 34px;
-}
-
 @media (max-width: 1100px) {
   .summary-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -817,10 +633,7 @@
 
 @media (max-width: 720px) {
   .docs-hero,
-  .stats-grid,
   .billing-detail__summary,
-  .modal-grid,
-  .modal-shell__footer,
   .summary-grid,
   .summary-date-grid {
     grid-template-columns: 1fr;
@@ -830,7 +643,6 @@
   .panel-headline,
   .record-card__header,
   .billing-card__header,
-  .modal-shell__header,
   .summary-period,
   .summary-progress__label {
     display: grid;
@@ -839,5 +651,4 @@
   .summary-panel__select {
     width: 100%;
   }
-
 }

@@ -29,6 +29,8 @@
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
+              "src/_redirects",
+              "src/_headers",
               {
                 "glob": "**/*",
                 "input": "src/assets",

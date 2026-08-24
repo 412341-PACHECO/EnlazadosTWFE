@@ -43,6 +43,14 @@ import {
 
 type DocsSection = 'records' | 'billings';
 type SemesterKey = `${number}-H1` | `${number}-H2`;
+type MonthlyRevenueChartItem = {
+  period: string;
+  label: string;
+  invoicedAmount: number;
+  collectedAmount: number;
+  invoicedHeight: number;
+  collectedHeight: number;
+};
 
 @Component({
   selector: 'app-home-docs-tab',
@@ -287,6 +295,67 @@ export class HomeDocsTabComponent implements OnInit {
       .reduce((sum, billing) => sum + billing.totalAmount, 0);
 
     return Math.round((totalCollected / totalInvoiced) * 100);
+  }
+
+  protected get monthlyRevenueChartData(): MonthlyRevenueChartItem[] {
+    const billingPeriods = this.getSemesterBillingPeriods(this.selectedSummarySemester);
+    const source = this.summaryFilteredBillings ?? this.attendanceBillings;
+    const groupedBillings = new Map<
+      string,
+      {
+        invoicedAmount: number;
+        collectedAmount: number;
+      }
+    >();
+
+    billingPeriods.forEach((period) => {
+      groupedBillings.set(period, {
+        invoicedAmount: 0,
+        collectedAmount: 0,
+      });
+    });
+
+    source.forEach((billing) => {
+      if (!groupedBillings.has(billing.billingPeriod)) {
+        return;
+      }
+
+      const current = groupedBillings.get(billing.billingPeriod);
+
+      if (!current) {
+        return;
+      }
+
+      current.invoicedAmount += billing.totalAmount;
+
+      if (billing.paymentStatus === 'LIQUIDATED') {
+        current.collectedAmount += billing.totalAmount;
+      }
+    });
+
+    const maxAmount = Math.max(
+      1,
+      ...Array.from(groupedBillings.values()).reduce<number[]>(
+        (accumulator, item) => accumulator.concat(item.invoicedAmount, item.collectedAmount),
+        [],
+      ),
+    );
+
+    return billingPeriods.map((period) => {
+      const item = groupedBillings.get(period) ?? {
+        invoicedAmount: 0,
+        collectedAmount: 0,
+      };
+
+      return {
+        period,
+        label: this.getShortMonthLabel(period),
+        invoicedAmount: item.invoicedAmount,
+        collectedAmount: item.collectedAmount,
+        invoicedHeight: Math.max(8, Math.round((item.invoicedAmount / maxAmount) * 100)),
+        collectedHeight: Math.max(8, Math.round((item.collectedAmount / maxAmount) * 100)),
+      };
+    });
   }
 
   protected get visibleRecords(): AttendanceRecordResponse[] {
@@ -833,6 +902,17 @@ export class HomeDocsTabComponent implements OnInit {
   private getSemesterRangeLabel(value: SemesterKey): string {
     const [yearPart, half] = value.split('-');
     return half === 'H1' ? `Enero a junio ${yearPart}` : `Julio a diciembre ${yearPart}`;
+  }
+
+  private getShortMonthLabel(period: string): string {
+    const [yearPart, monthPart] = period.split('-');
+    const date = new Date(Number(yearPart), Number(monthPart) - 1, 1);
+
+    return new Intl.DateTimeFormat('es-AR', {
+      month: 'short',
+    })
+      .format(date)
+      .replace('.', '');
   }
 
   private async refreshSummaryBillingRange(): Promise<void> {

@@ -115,6 +115,37 @@
           <span [style.width.%]="summaryPaidProgress"></span>
         </div>
       </div>
+
+      <section class="revenue-chart-card">
+        <div class="revenue-chart-card__header">
+          <div>
+            <h3>Comparación mensual</h3>
+            <p>Visualizá cuánto liquidaste y cuánto ya cobraste en cada mes del período.</p>
+          </div>
+
+          <div class="revenue-chart-card__legend">
+            <span class="legend-pill legend-pill--invoiced">Liquidado</span>
+            <span class="legend-pill legend-pill--collected">Cobrado</span>
+          </div>
+        </div>
+
+        <div class="revenue-chart">
+          @for (item of monthlyRevenueChartData; track item.period) {
+            <div class="revenue-chart__column">
+              <div class="revenue-chart__bars">
+                <div class="revenue-bar revenue-bar--invoiced" [style.height.%]="item.invoicedHeight">
+                  <span>{{ formatCurrency(item.invoicedAmount) }}</span>
+                </div>
+                <div class="revenue-bar revenue-bar--collected" [style.height.%]="item.collectedHeight">
+                  <span>{{ formatCurrency(item.collectedAmount) }}</span>
+                </div>
+              </div>
+
+              <small>{{ item.label }}</small>
+            </div>
+          }
+        </div>
+      </section>
     </section>
 
 

@@ -81,3 +81,66 @@ app-home-map-tab{
   .leaflet-popup-content-wrapper{padding:0;border-radius:20px;box-shadow:0 18px 36px rgba(13,35,68,.16)}
   .leaflet-popup-tip{box-shadow:none}
 }
+
+app-home-docs-tab{
+  .revenue-chart-card{display:grid;gap:18px;padding:20px 18px 18px;border-radius:24px;border:1px solid rgba(17,149,183,.1);background:linear-gradient(180deg,rgba(17,149,183,.04) 0%,rgba(255,255,255,.98) 22%),#fff;box-shadow:0 12px 28px rgba(11,31,58,.05)}
+  .revenue-chart-card__header{display:flex;align-items:start;justify-content:space-between;gap:14px}
+  .revenue-chart-card__header h3,.revenue-chart-card__header p{margin:0}
+  .revenue-chart-card__header h3{color:#0d2344;font-size:1.08rem}
+  .revenue-chart-card__header p{margin-top:4px;color:#6d7c92;line-height:1.5}
+  .revenue-chart-card__legend{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .legend-pill{min-height:28px;padding:0 10px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:700}
+  .legend-pill--invoiced{background:rgba(17,149,183,.12);color:#1195b7}
+  .legend-pill--collected{background:rgba(29,187,130,.12);color:#1dbb82}
+  .revenue-chart{min-height:246px;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px;align-items:end;padding:16px 14px 0;border-radius:20px;background:linear-gradient(180deg,rgba(17,149,183,.04),rgba(17,149,183,0)),repeating-linear-gradient(to top,rgba(17,149,183,.08) 0,rgba(17,149,183,.08) 1px,transparent 1px,transparent 52px)}
+  .revenue-chart__column{display:grid;gap:10px;justify-items:center}
+  .revenue-chart__bars{width:100%;min-height:190px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;align-items:end}
+  .revenue-bar{position:relative;min-height:8px;border-radius:16px 16px 8px 8px;display:flex;align-items:flex-start;justify-content:center;padding-top:8px;box-shadow:0 10px 18px rgba(12,27,52,.08)}
+  .revenue-bar span{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);padding:4px 8px;border-radius:999px;background:rgba(13,35,68,.92);color:#fff;font-size:.66rem;font-weight:700;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .18s ease}
+  .revenue-bar:hover span{opacity:1}
+  .revenue-bar--invoiced{background:linear-gradient(180deg,#1db4d4 0%,#1195b7 100%)}
+  .revenue-bar--collected{background:linear-gradient(180deg,#37d4a0 0%,#1dbb82 100%)}
+  .revenue-chart__column small{color:#6d7c92;font-size:.78rem;font-weight:700;text-transform:capitalize}
+  .modal-backdrop{position:fixed;inset:0;z-index:1300;display:grid;place-items:center;padding:18px;background:rgba(8,24,44,.44);backdrop-filter:blur(6px)}
+  .modal-shell{width:min(100%,680px);border-radius:28px;padding:22px;gap:18px}
+  .modal-shell__header p{color:#1195b7;font-size:.82rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em}
+  .modal-shell__footer{display:grid;grid-template-columns:1fr auto;gap:10px}
+  .modal-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+  .modal-shell--record{width:min(100%,392px);border-radius:24px;padding:22px 22px 20px;gap:20px;background:#fff;border-top:4px solid #12b8d4}
+  .modal-shell--record .modal-shell__header{align-items:center}
+  .modal-shell--record .modal-shell__header h3{font-size:1.05rem;font-weight:700}
+  .modal-shell--record .modal-shell__header p{font-size:.78rem;letter-spacing:.08em}
+  .modal-shell--record .secondary-icon{width:34px;height:34px;background:#f4f6fa;color:#92a0b3}
+  .modal-shell--record .modal-shell__body{display:grid;gap:14px}
+  .modal-shell--record .field-block{gap:6px}
+  .modal-shell--record .field-block>span{font-size:.72rem;letter-spacing:.08em;color:#6e7f96}
+  .modal-shell--record .field-block__control--select app-custom-select{display:block}
+  .modal-shell--record ::ng-deep .custom-select__trigger,.modal-shell--record .field-block__control--record,.modal-shell--record .field-block__control--textarea{min-height:42px;border-radius:14px;border:1px solid #d9e2ee;background:#fff;box-shadow:none}
+  .modal-shell--record ::ng-deep .custom-select__trigger{min-height:44px}
+  .modal-shell--record ::ng-deep .custom-select--open .custom-select__trigger{box-shadow:0 0 0 4px rgba(17,149,183,.08)}
+  .modal-shell--record .field-block__control--record{min-height:42px;padding:0 14px;font-size:.95rem}
+  .modal-shell--record .field-block__control--textarea{min-height:108px;padding:14px}
+  .modal-shell--record .modal-grid{gap:12px}
+  .modal-shell--record .modal-shell__footer{grid-template-columns:1fr 1fr;gap:10px}
+  .modal-shell--record .secondary-ghost,.modal-shell--record .primary-cta{min-height:44px;border-radius:14px}
+  .modal-shell--record .secondary-ghost{border-color:#d9e2ee;color:#0d2344}
+  .modal-shell--record .primary-cta{box-shadow:0 10px 18px rgba(17,149,183,.22)}
+  .currency-field{position:relative}
+  .currency-field span{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#7d8ca1;font-size:.95rem;font-weight:700;pointer-events:none;z-index:1}
+  .currency-field .field-block__control--record{padding-left:34px}
+}
+
+@media (max-width:940px){
+  app-home-docs-tab{
+    .revenue-chart-card__header{display:grid}
+  }
+}
+
+@media (max-width:720px){
+  app-home-docs-tab{
+    .revenue-chart{grid-template-columns:1fr;min-height:auto;gap:18px;padding:14px}
+    .revenue-chart__column{grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:12px}
+    .revenue-chart__bars{min-height:140px}
+    .modal-grid,.modal-shell__footer{grid-template-columns:1fr}
+  }
+}
